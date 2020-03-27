@@ -25,26 +25,6 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-    	<groupId>org.lwjgl</groupId>
-    	<artifactId>lwjgl</artifactId>
-    	<version>3.2.3</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.lwjgl</groupId>
-    	<artifactId>lwjgl-glfw</artifactId>
-    	<version>3.2.3</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.lwjgl</groupId>
-    	<artifactId>lwjgl-openal</artifactId>
-    	<version>3.2.3</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.lwjgl</groupId>
-    	<artifactId>lwjgl-opengl</artifactId>
-    	<version>3.2.3</version>
-    </dependency>
   </dependencies>
 
   <build>
