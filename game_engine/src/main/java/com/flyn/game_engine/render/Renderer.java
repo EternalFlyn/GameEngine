@@ -1,0 +1,32 @@
+package com.flyn.game_engine.render;
+
+import java.awt.Color;
+
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
+
+public class Renderer {
+	
+	private float hue = 0;
+	
+	public void prepare() {
+		hue += 0.01f;
+		if(hue > 1) hue = 0;
+		Color backgroundColor = Color.getHSBColor(hue, 1, 1);
+		GL11.glClearColor(backgroundColor.getRed() / 255f, backgroundColor.getGreen() / 255f, backgroundColor.getBlue() / 255f, backgroundColor.getAlpha() / 255f);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+	}
+	
+	public void render(RawModel model) {
+		GL30.glBindVertexArray(model.getVaoID());
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, model.getIndicesID());
+		GL20.glEnableVertexAttribArray(0);
+		GL11.glDrawElements(GL11.GL_TRIANGLES, model.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+		GL20.glDisableVertexAttribArray(0);
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+		GL30.glBindVertexArray(0);
+	}
+
+}

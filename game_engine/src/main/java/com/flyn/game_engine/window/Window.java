@@ -9,6 +9,10 @@ import java.awt.Color;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
+import com.flyn.game_engine.render.ModelLoader;
+import com.flyn.game_engine.render.RawModel;
+import com.flyn.game_engine.render.Renderer;
+import com.flyn.game_engine.shader.DefaultShader;
 import com.flyn.game_engine.window.input.KeyInput;
 import com.flyn.game_engine.window.input.MouseInput;
 
@@ -16,7 +20,6 @@ public class Window {
 	
 	private static final float COLOR_MAX = 255;
 	
-	private boolean isRunning = true;
 	private float hue = 0;
 	private long window;
 	private Color backgroundColor;
@@ -47,42 +50,45 @@ public class Window {
 		
 	}
 	
-	protected void render() {
-		hue += 0.01f;
-		if(hue > 1) hue = 0;
-		backgroundColor = Color.getHSBColor(hue, 1, 1);
-		glClearColor(backgroundColor.getRed() / COLOR_MAX, backgroundColor.getGreen() / COLOR_MAX, backgroundColor.getBlue() / COLOR_MAX, backgroundColor.getAlpha() / COLOR_MAX);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glfwSwapBuffers(window);
-	}
-	
-	protected void stop() {
-		glfwTerminate();
-	}
-	
-	public void run() {
-		glfwPollEvents();
-		render();
-		if(glfwWindowShouldClose(window)) {
-			isRunning = false;
-			stop();
-		}
-	}
-	
 	public void showWindow() {
 		glfwShowWindow(window);
 		glfwMakeContextCurrent(window);
 		GL.createCapabilities();
 		glEnable(GL_DEPTH_TEST);
 		System.out.println("version : " + glGetString(GL_VERSION));
-		while(isRunning) {
-			run();
+		
+		ModelLoader loader = new ModelLoader();
+		Renderer renderer = new Renderer();
+		DefaultShader shader = new DefaultShader();
+		
+		int[] indices = {0, 1, 2, 2, 3, 0};
+		
+		float[] vertices = {
+				0.5f, 0.5f, 0,
+				-0.5f, 0.5f, 0,
+				-0.5f, -0.5f, 0,
+				0.5f, -0.5f, 0
+		};
+		
+		RawModel model = loader.loadToVAO(indices, vertices);
+		
+		while(!glfwWindowShouldClose(window)) {
+			glfwPollEvents();
+			renderer.prepare();
+			shader.enable();
+			renderer.render(model);
+			shader.disable();
+			glfwSwapBuffers(window);
 			try {
 				Thread.sleep(16);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		shader.remove();
+		loader.clean();
+		glfwTerminate();
 	}
 	
 }
