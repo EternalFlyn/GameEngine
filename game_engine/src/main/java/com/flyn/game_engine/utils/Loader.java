@@ -1,28 +1,43 @@
-package com.flyn.game_engine.render;
+package com.flyn.game_engine.utils;
 
 import java.util.ArrayList;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import com.flyn.game_engine.utils.BufferUtils;
+import com.flyn.game_engine.render.RawModel;
 
-public class ModelLoader {
+public class Loader {
 	
-	private ArrayList<Integer> vaos = new ArrayList<>(), vbos = new ArrayList<>();
+	private ArrayList<Integer> vaos = new ArrayList<>(), vbos = new ArrayList<>(), textures = new ArrayList<>();
 	
-	public RawModel loadToVAO(int[] indices, float[] positions) {
+	public RawModel loadToVAO(int[] indices, float[] positions, float[] textureCoords) {
 		int vaoID = createVAO();
 		int indicesID = bindIndices(indices);
 		storeAttribute(0, 3, positions);
+		storeAttribute(1, 2, textureCoords);
 		unbindVAO();
 		return new RawModel(vaoID, indicesID, indices.length);
+	}
+	
+	public int loadTexture(String ImagePath) {
+		int[][] img = FileUtils.loadImage(ImagePath);
+		int result = GL11.glGenTextures();
+		textures.add(result);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, result);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, img[0][0], img[0][1], 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(img[1]));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		return result;
 	}
 	
 	public void clean() {
 		for(int vao : vaos) GL30.glDeleteVertexArrays(vao);
 		for(int vbo : vbos) GL15.glDeleteBuffers(vbo);
+		for(int texture : textures) GL11.glDeleteTextures(texture);
 	}
 	
 	private int createVAO() {

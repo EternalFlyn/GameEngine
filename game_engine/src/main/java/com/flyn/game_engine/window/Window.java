@@ -9,10 +9,13 @@ import java.awt.Color;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
-import com.flyn.game_engine.render.ModelLoader;
 import com.flyn.game_engine.render.RawModel;
 import com.flyn.game_engine.render.Renderer;
+import com.flyn.game_engine.render.Texture;
+import com.flyn.game_engine.render.TexturedModel;
 import com.flyn.game_engine.shader.DefaultShader;
+import com.flyn.game_engine.shader.TexturedShader;
+import com.flyn.game_engine.utils.Loader;
 import com.flyn.game_engine.window.input.KeyInput;
 import com.flyn.game_engine.window.input.MouseInput;
 
@@ -57,9 +60,10 @@ public class Window {
 		glEnable(GL_DEPTH_TEST);
 		System.out.println("version : " + glGetString(GL_VERSION));
 		
-		ModelLoader loader = new ModelLoader();
+		Loader loader = new Loader();
 		Renderer renderer = new Renderer();
 		DefaultShader shader = new DefaultShader();
+		TexturedShader textureShader = new TexturedShader();
 		
 		int[] indices = {0, 1, 2, 2, 3, 0};
 		
@@ -70,14 +74,23 @@ public class Window {
 				0.5f, -0.5f, 0
 		};
 		
-		RawModel model = loader.loadToVAO(indices, vertices);
+		float[] textureCoords = {
+			1, 0,
+			0, 0,
+			0, 1,
+			1, 1
+		};
+		
+		RawModel model = loader.loadToVAO(indices, vertices, textureCoords);
+		Texture texture = new Texture(loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"));
+		TexturedModel textureModel = new TexturedModel(model, texture);
 		
 		while(!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 			renderer.prepare();
-			shader.enable();
-			renderer.render(model);
-			shader.disable();
+			textureShader.enable();
+			renderer.render(textureModel);
+			textureShader.disable();
 			glfwSwapBuffers(window);
 			try {
 				Thread.sleep(16);
