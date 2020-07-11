@@ -1,5 +1,6 @@
 package com.flyn.game_engine.shader;
 
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 
 import java.util.HashMap;
@@ -8,19 +9,17 @@ import org.lwjgl.opengl.GL20;
 
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
-import com.flyn.game_engine.utils.ShaderUtils;
-
+import com.flyn.game_engine.utils.FileUtils;
 public abstract class ShaderProgram {
 	
 	private int programID, vertexShaderID, fragmentShaderID;
 	private HashMap<String, Integer> locationCache = new HashMap<String, Integer> ();
 	
 	public ShaderProgram(String vertexFile, String fragmentFile) {
-		int[] ID = ShaderUtils.load(vertexFile, fragmentFile);
+		int[] ID = load(vertexFile, fragmentFile);
 		programID = ID[0];
 		vertexShaderID = ID[1];
 		fragmentShaderID = ID[2];
-		bindAttributes();
 	}
 	
 	public int getUniform(String name) {
@@ -55,6 +54,55 @@ public abstract class ShaderProgram {
 	
 	protected void bindAttribute(int attributeIndex, String attributeName) {
 		GL20.glBindAttribLocation(programID, attributeIndex, attributeName);
+	}
+	
+	private int[] load(String vertexFile, String fragmentFile) {
+		String vertexData = FileUtils.loadAsString(vertexFile);
+		String fragmentData = FileUtils.loadAsString(fragmentFile);
+		return create(vertexData, fragmentData);
+	}
+	
+	private int[] create(String vertexData, String fragmentData) {
+		int programID = glCreateProgram();
+		int vertexID = glCreateShader(GL_VERTEX_SHADER);
+		int fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(vertexID, vertexData);
+		glShaderSource(fragmentID, fragmentData);
+		
+		glCompileShader(vertexID);
+		if(glGetShaderi(vertexID, GL_COMPILE_STATUS) == GL_FALSE) {
+			System.err.println("Failed to compile vertex shader!");
+			System.err.println(glGetShaderInfoLog(vertexID));
+			return null;
+		}
+		
+		glCompileShader(fragmentID);
+		if(glGetShaderi(fragmentID, GL_COMPILE_STATUS) == GL_FALSE) {
+			System.err.println("Failed to compile fragment shader!");
+			System.err.println(glGetShaderInfoLog(fragmentID));
+			return null;
+		}
+		
+		glAttachShader(programID, vertexID);
+		glAttachShader(programID, fragmentID);
+		
+		bindAttributes();
+		
+		glLinkProgram(programID);
+		if(glGetProgrami(programID, GL_LINK_STATUS) == GL_FALSE) {
+			System.err.println("Failed to link program!");
+			System.err.println(glGetShaderInfoLog(programID));
+			return null;
+		}
+		
+		glValidateProgram(programID);
+		if(glGetProgrami(programID, GL_VALIDATE_STATUS) == GL_FALSE) {
+			System.err.println("Failed to validate program!");
+			System.err.println(glGetShaderInfoLog(programID));
+			return null;
+		}
+		
+		return new int[] {programID, vertexID, fragmentID};
 	}
 	
 	public void enable() {

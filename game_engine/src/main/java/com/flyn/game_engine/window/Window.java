@@ -4,13 +4,13 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-import java.awt.Color;
-
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
 import com.flyn.game_engine.entity.Entity;
+import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
+import com.flyn.game_engine.render.Camera;
 import com.flyn.game_engine.render.RawModel;
 import com.flyn.game_engine.render.Renderer;
 import com.flyn.game_engine.render.Texture;
@@ -20,14 +20,14 @@ import com.flyn.game_engine.shader.TexturedShader;
 import com.flyn.game_engine.utils.Loader;
 import com.flyn.game_engine.window.input.KeyInput;
 import com.flyn.game_engine.window.input.MouseInput;
+import com.flyn.game_engine.window.input.MouseMotionInput;
 
 public class Window {
 	
-	private static final float COLOR_MAX = 255;
+	public static Input input = new Input();
 	
-	private float hue = 0;
+	private int width = 0, height = 0;
 	private long window;
-	private Color backgroundColor;
 	private GLFWVidMode vidmode;
 	
 	public Window() {
@@ -39,6 +39,8 @@ public class Window {
 	}
 	
 	public void setWindow(String title, int width, int height) {
+		this.width = width;
+		this.height = height;
 		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); //設定視窗不可調整大小
 		window = glfwCreateWindow(width, height, title, NULL, NULL); //創建視窗
 		
@@ -50,8 +52,9 @@ public class Window {
 		glfwSetWindowPos(window, (vidmode.width() - width) / 2, (vidmode.height() - height) / 2); //設定螢幕位置
 		
 		//設定鍵盤和滑鼠輸入
-		glfwSetKeyCallback(window, new KeyInput(new Input(window)));
-		glfwSetMouseButtonCallback(window, new MouseInput(new Input(window)));
+		glfwSetKeyCallback(window, new KeyInput(input));
+		glfwSetMouseButtonCallback(window, new MouseInput(input));
+		glfwSetCursorPosCallback(window, new MouseMotionInput(input));
 		
 	}
 	
@@ -63,9 +66,10 @@ public class Window {
 		System.out.println("version : " + glGetString(GL_VERSION));
 		
 		Loader loader = new Loader();
-		Renderer renderer = new Renderer();
 		DefaultShader shader = new DefaultShader();
 		TexturedShader textureShader = new TexturedShader();
+		Renderer renderer = new Renderer(textureShader, width, height);
+		Camera camera = new Camera();
 		
 		int[] indices = {0, 1, 2, 2, 3, 0};
 		
@@ -86,20 +90,23 @@ public class Window {
 		RawModel model = loader.loadToVAO(indices, vertices, textureCoords);
 		Texture texture = new Texture(loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"));
 		TexturedModel textureModel = new TexturedModel(model, texture);
-		Entity entity = new Entity(textureModel, new Vector3f(), new Vector3f(), new Vector3f(1.3f, 1, 1));
+		Entity entity = new Entity(textureModel, new Vector3f(0, 0, -1), new Vector3f(), new Vector3f(1.3f, 1, 1));
 		float s = 0.02f;
 		
 		while(!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
+			camera.move();
 			renderer.prepare();
 			textureShader.enable();
+			textureShader.setUniform4f("view", camera.createViewMatrix());
 			renderer.render(entity, textureShader);
 			textureShader.disable();
 			glfwSwapBuffers(window);
+			entity.move(0, 0, -0.01f);
 //			entity.rotate(0, 0, 1);
-			if(s > 0 && entity.getScale().x > 1.5f) s = -0.01f;
-			else if(s < 0 && entity.getScale().x < 1) s = 0.02f;
-			entity.zoom(1.3f * s, s, 0);
+//			if(s > 0 && entity.getScale().x > 1.5f) s = -0.01f;
+//			else if(s < 0 && entity.getScale().x < 1) s = 0.02f;
+//			entity.zoom(1.3f * s, s, 0);
 			try {
 				Thread.sleep(16);
 			} catch (InterruptedException e) {
