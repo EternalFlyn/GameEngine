@@ -9,6 +9,8 @@ import java.awt.Color;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
+import com.flyn.game_engine.entity.Entity;
+import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.render.RawModel;
 import com.flyn.game_engine.render.Renderer;
 import com.flyn.game_engine.render.Texture;
@@ -84,14 +86,20 @@ public class Window {
 		RawModel model = loader.loadToVAO(indices, vertices, textureCoords);
 		Texture texture = new Texture(loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"));
 		TexturedModel textureModel = new TexturedModel(model, texture);
+		Entity entity = new Entity(textureModel, new Vector3f(), new Vector3f(), new Vector3f(1.3f, 1, 1));
+		float s = 0.02f;
 		
 		while(!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 			renderer.prepare();
 			textureShader.enable();
-			renderer.render(textureModel);
+			renderer.render(entity, textureShader);
 			textureShader.disable();
 			glfwSwapBuffers(window);
+//			entity.rotate(0, 0, 1);
+			if(s > 0 && entity.getScale().x > 1.5f) s = -0.01f;
+			else if(s < 0 && entity.getScale().x < 1) s = 0.02f;
+			entity.zoom(1.3f * s, s, 0);
 			try {
 				Thread.sleep(16);
 			} catch (InterruptedException e) {
