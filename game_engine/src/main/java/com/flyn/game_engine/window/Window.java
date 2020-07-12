@@ -17,6 +17,7 @@ import com.flyn.game_engine.render.Texture;
 import com.flyn.game_engine.render.TexturedModel;
 import com.flyn.game_engine.shader.DefaultShader;
 import com.flyn.game_engine.shader.TexturedShader;
+import com.flyn.game_engine.utils.FileUtils;
 import com.flyn.game_engine.utils.Loader;
 import com.flyn.game_engine.window.input.KeyInput;
 import com.flyn.game_engine.window.input.MouseInput;
@@ -90,7 +91,12 @@ public class Window {
 		RawModel model = loader.loadToVAO(indices, vertices, textureCoords);
 		Texture texture = new Texture(loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"));
 		TexturedModel textureModel = new TexturedModel(model, texture);
-		Entity entity = new Entity(textureModel, new Vector3f(0, 0, -1), new Vector3f(), new Vector3f(1.3f, 1, 1));
+		Entity entity = new Entity(textureModel, new Vector3f(0, 0, -1), new Vector3f(), new Vector3f(1, 1, 1));
+		
+		Texture stallTexture = new Texture(loader.loadTexture("src/main/java/texture/stallTexture.png"));
+		TexturedModel stallModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/stall.obj"), stallTexture);
+		Entity stall = new Entity(stallModel, new Vector3f(0, -2.5f, -10), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1));
+		
 		float s = 0.02f;
 		
 		while(!glfwWindowShouldClose(window)) {
@@ -99,11 +105,12 @@ public class Window {
 			renderer.prepare();
 			textureShader.enable();
 			textureShader.setUniform4f("view", camera.createViewMatrix());
+			renderer.render(stall, textureShader);
 			renderer.render(entity, textureShader);
 			textureShader.disable();
 			glfwSwapBuffers(window);
-			entity.move(0, 0, -0.01f);
-//			entity.rotate(0, 0, 1);
+			stall.rotate(0, 1, 0);
+//			entity.move(0, 0, -0.01f);
 //			if(s > 0 && entity.getScale().x > 1.5f) s = -0.01f;
 //			else if(s < 0 && entity.getScale().x < 1) s = 0.02f;
 //			entity.zoom(1.3f * s, s, 0);

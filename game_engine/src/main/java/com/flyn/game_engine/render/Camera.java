@@ -12,8 +12,11 @@ public class Camera {
 	
 	public void move() {
 		if(Window.input.isKeyPressed(KeyEvent.VK_W)) position.z -= 0.02f;
+		if(Window.input.isKeyPressed(KeyEvent.VK_S)) position.z += 0.02f;
 		if(Window.input.isKeyPressed(KeyEvent.VK_A)) position.x -= 0.02f;
 		if(Window.input.isKeyPressed(KeyEvent.VK_D)) position.x += 0.02f;
+		if(Window.input.isKeyPressed(265)) position.y += 0.02f;
+		if(Window.input.isKeyPressed(264)) position.y -= 0.02f;
 	}
 	
 	public Vector3f getPosition() {

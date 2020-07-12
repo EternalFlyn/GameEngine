@@ -22,7 +22,7 @@ public class Entity {
 		Matrix4f translate = Matrix4f.translate(position);
 		Matrix4f rotation = Matrix4f.rotate(this.rotation.x, this.rotation.y, this.rotation.z);
 		Matrix4f scale = Matrix4f.zoom(this.scale.x, this.scale.y, this.scale.z);
-		transformationMatirx = translate.multiply(rotation).multiply(scale);
+		transformationMatirx = rotation.multiply(translate).multiply(scale);
 	}
 
 	public Vector3f getPosition() {
