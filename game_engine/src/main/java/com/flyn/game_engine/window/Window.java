@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 import java.awt.Color;
+import java.util.Random;
 
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -26,10 +27,11 @@ import com.flyn.game_engine.window.input.MouseMotionInput;
 
 public class Window {
 	
+	public static long time = 0;
 	public static Input input = new Input();
 	
 	private int width = 0, height = 0;
-	private long window;
+	private long window, startedTime = 0;
 	private GLFWVidMode vidmode;
 	
 	public Window() {
@@ -67,6 +69,7 @@ public class Window {
 		glEnable(GL_DEPTH_TEST);
 		System.out.println("version : " + glGetString(GL_VERSION));
 		
+		startedTime = System.currentTimeMillis();
 		Loader loader = new Loader();
 		MasterRenderer renderer = new MasterRenderer(width, height);
 		Light light = new Light(new Vector3f(0, 1, 0), new Vector3f(1, 1, 1));
@@ -116,18 +119,31 @@ public class Window {
 		TexturedModel dragonModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/dragon.obj"), dragonTexture);
 		Entity dragon = new Entity(dragonModel, new Vector3f(-7, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
 		
+		Texture poppyTexture = new Texture(loader.loadTexture("src/main/java/texture/poppy.png"));
+		poppyTexture.setTransparency(true);
+		poppyTexture.setUsedFakeLight(true);
+		TexturedModel poppyModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/poppy.obj"), poppyTexture);
+		Entity[] poppys = new Entity[100];
+		for(int i = 0; i < poppys.length; i++) {
+			Random ran = new Random();
+			float x = ran.nextFloat() * 20 - 10, z = ran.nextFloat() * 20 - 10;
+			poppys[i] = new Entity(poppyModel, new Vector3f(x, 0, z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+		}
+		
 		Texture grassTerrain = new Texture(loader.loadTexture("src/main/java/texture/grass_block_top.png"));
 		Terrain terrain = new Terrain(0, -1, loader, grassTerrain);
 		Terrain terrain2 = new Terrain(-1, -1, loader, grassTerrain);
 		terrain2.setGrassColor(new Color(153, 255, 77));
 		
 		while(!glfwWindowShouldClose(window)) {
+			time = System.currentTimeMillis() - startedTime;
 			glfwPollEvents();
 			camera.move();
 			renderer.addEntity(dragon);
 			renderer.addEntity(girl);
 			renderer.addEntity(stall);
 			renderer.addEntity(entity);
+			for(Entity poppy : poppys) renderer.addEntity(poppy);
 			renderer.addTerrain(terrain);
 			renderer.addTerrain(terrain2);
 			renderer.render(light, camera);

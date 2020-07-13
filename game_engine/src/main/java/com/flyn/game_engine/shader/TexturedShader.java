@@ -41,4 +41,13 @@ public class TexturedShader extends ShaderProgram {
 		setUniform1f("reflectivity", reflectivity);
 	}
 	
+	public void setUsedFakeLight(boolean useFakeLight) {
+		if(useFakeLight) setUniform1f("useFakeLight", 1);
+		else setUniform1f("useFakeLight", 0);
+	}
+	
+	public void setMinBrightness(float level) {
+		setUniform1f("minBrightness", level);
+	}
+	
 }

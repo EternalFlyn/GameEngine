@@ -12,13 +12,14 @@ uniform vec3 lightColor;
 uniform float shineDamper;
 uniform float reflectivity;
 uniform vec3 grassColor;
+uniform float minBrightness;
 
 void main(void) {
 
 	vec3 unitNormal = normalize(surfaceNormal);
 	vec3 unitLightVector = normalize(toLightVector);
 	
-	float brightness = max(dot(unitNormal, unitLightVector), 0.2);
+	float brightness = max(dot(unitNormal, unitLightVector), minBrightness);
 	vec4 diffuse = vec4(brightness * lightColor, 1);
 	
 	vec3 unitCameraVector = normalize(toCameraVector);

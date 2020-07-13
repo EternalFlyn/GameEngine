@@ -49,4 +49,8 @@ public class TerrainShader extends ShaderProgram {
 		setUniform3f("grassColor", colorVector);
 	}
 	
+	public void setMinBrightness(float level) {
+		setUniform1f("minBrightness", level);
+	}
+	
 }

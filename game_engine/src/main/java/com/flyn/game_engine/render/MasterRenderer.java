@@ -13,6 +13,7 @@ import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.shader.TerrainShader;
 import com.flyn.game_engine.shader.TexturedShader;
 import com.flyn.game_engine.terrain.Terrain;
+import com.flyn.game_engine.window.Window;
 
 public class MasterRenderer {
 	
@@ -34,26 +35,38 @@ public class MasterRenderer {
 	private ArrayList<Terrain> terrains = new ArrayList<>();
 	
 	public MasterRenderer(int width, int height) {
-		GL11.glEnable(GL11.GL_CULL_FACE);
-		GL11.glCullFace(GL11.GL_BACK);
+		enableCulling();
 		aspectRatio = (float) width / (float) height;
 		createProjectionMatrix();
 		entityRenderer = new EntityRenderer(entityShader, projectionMatrix);
 		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
 	}
 	
+	public static void enableCulling() {
+		GL11.glEnable(GL11.GL_CULL_FACE);
+		GL11.glCullFace(GL11.GL_BACK);
+	}
+	
+	public static void disableCulling() {
+		GL11.glDisable(GL11.GL_CULL_FACE);
+	}
+	
 	public void render(Light light, Camera camera) {
-		prepare();
+		float brightnessFactor = 1 - (float) (Window.time % 30000) / 15000.0f;
+		float minBrightness = 0.6f * (brightnessFactor * brightnessFactor) + 0.1f;
+		prepare(minBrightness);
 		
 		entityShader.enable();
 		entityShader.setLight(light);
 		entityShader.setViewPosition(camera.createViewMatrix());
+		entityShader.setMinBrightness(minBrightness);
 		entityRenderer.render(entities);
 		entityShader.disable();
 		
 		terrainShader.enable();
 		terrainShader.setLight(light);
 		terrainShader.setViewPosition(camera.createViewMatrix());
+		terrainShader.setMinBrightness(minBrightness);
 		terrainRenderer.render(terrains);
 		terrainShader.disable();
 		
@@ -78,10 +91,10 @@ public class MasterRenderer {
 		list.add(entity);
 	}
 	
-	public void prepare() {
+	public void prepare(float brightness) {
 		hue += 0.01f;
 		if(hue > 1) hue = 0;
-		Color backgroundColor = Color.getHSBColor(hue, 1, 1);
+		Color backgroundColor = Color.getHSBColor(0.5f, 1, brightness);
 		GL11.glClearColor(backgroundColor.getRed() / 255f, backgroundColor.getGreen() / 255f, backgroundColor.getBlue() / 255f, backgroundColor.getAlpha() / 255f);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
