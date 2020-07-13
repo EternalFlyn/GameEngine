@@ -22,7 +22,7 @@ public abstract class ShaderProgram {
 		fragmentShaderID = ID[2];
 	}
 	
-	public int getUniform(String name) {
+	private int getUniform(String name) {
 		if(locationCache.containsKey(name)) return locationCache.get(name);
 		int result = glGetUniformLocation(programID, name);
 		if (result == -1) System.err.println("Couldn't find uniform variable " + name + "!");
@@ -30,23 +30,23 @@ public abstract class ShaderProgram {
 		return result;
 	}
 	
-	public void setUniform1i(String name, int value) {
+	protected void setUniform1i(String name, int value) {
 		glUniform1i(getUniform(name), value);
 	}
 	
-	public void setUniform1f(String name, float value) {
+	protected void setUniform1f(String name, float value) {
 		glUniform1f(getUniform(name), value);
 	}
 	
-	public void setUniform2f(String name, float x, float y) {
+	protected void setUniform2f(String name, float x, float y) {
 		glUniform2f(getUniform(name), x, y);
 	}
 	
-	public void setUniform3f(String name, Vector3f vector) {
+	protected void setUniform3f(String name, Vector3f vector) {
 		glUniform3f(getUniform(name), vector.x, vector.y, vector.z);
 	}
 	
-	public void setUniform4f(String name, Matrix4f matrix) {
+	protected void setUniform4f(String name, Matrix4f matrix) {
 		glUniformMatrix4fv(getUniform(name), false, matrix.toFloatBuffer());
 	}
 	

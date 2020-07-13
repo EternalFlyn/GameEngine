@@ -48,11 +48,11 @@ public class FileUtils {
 		int[] data = new int[width * height];
 		for(int i = 0; i < width * height; i++) {
 			int a = (pixel[i] & 0xFF000000) >> 24;
-		int r = (pixel[i] & 0xFF0000) >> 16;
-		int g = (pixel[i] & 0xFF00) >> 8;
-		int b = (pixel[i] & 0xFF);
+			int r = (pixel[i] & 0xFF0000) >> 16;
+			int g = (pixel[i] & 0xFF00) >> 8;
+			int b = (pixel[i] & 0xFF);
 
-		data[i] = a << 24 | b << 16 | g << 8 | r;
+			data[i] = a << 24 | b << 16 | g << 8 | r;
 		}
 		return new int[][] {{width, height}, data};
 	}
@@ -86,7 +86,6 @@ public class FileUtils {
 					if(!inFaceData) {
 						inFaceData = true;
 						int length = verticesArray.size();
-						System.out.println(length);
 						vertices = new float[length];
 						textures = new float[(int) (2.0f / 3.0f * length)];
 						normals = new float[length];
@@ -106,7 +105,7 @@ public class FileUtils {
 							normals[vertexNumber * 3 + 2] = normalVector.z;
 						}
 					}
-					
+
 				}
 			}
 			reader.close();
@@ -117,7 +116,7 @@ public class FileUtils {
 			System.err.println("Couldn't find the file : " + filePath);
 			e.printStackTrace();
 		}
-		return loader.loadToVAO(indices, vertices, textures);
+		return loader.loadToVAO(indices, vertices, textures, normals);
 	}
 
 }

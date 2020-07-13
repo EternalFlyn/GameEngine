@@ -4,19 +4,20 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
+import java.awt.Color;
+
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
+import com.flyn.game_engine.entity.Camera;
 import com.flyn.game_engine.entity.Entity;
-import com.flyn.game_engine.math.Matrix4f;
+import com.flyn.game_engine.entity.Light;
 import com.flyn.game_engine.math.Vector3f;
-import com.flyn.game_engine.render.Camera;
+import com.flyn.game_engine.render.MasterRenderer;
 import com.flyn.game_engine.render.RawModel;
-import com.flyn.game_engine.render.Renderer;
 import com.flyn.game_engine.render.Texture;
 import com.flyn.game_engine.render.TexturedModel;
-import com.flyn.game_engine.shader.DefaultShader;
-import com.flyn.game_engine.shader.TexturedShader;
+import com.flyn.game_engine.terrain.Terrain;
 import com.flyn.game_engine.utils.FileUtils;
 import com.flyn.game_engine.utils.Loader;
 import com.flyn.game_engine.window.input.KeyInput;
@@ -67,9 +68,8 @@ public class Window {
 		System.out.println("version : " + glGetString(GL_VERSION));
 		
 		Loader loader = new Loader();
-		DefaultShader shader = new DefaultShader();
-		TexturedShader textureShader = new TexturedShader();
-		Renderer renderer = new Renderer(textureShader, width, height);
+		MasterRenderer renderer = new MasterRenderer(width, height);
+		Light light = new Light(new Vector3f(0, 1, 0), new Vector3f(1, 1, 1));
 		Camera camera = new Camera();
 		
 		int[] indices = {0, 1, 2, 2, 3, 0};
@@ -88,32 +88,51 @@ public class Window {
 			1, 1
 		};
 		
-		RawModel model = loader.loadToVAO(indices, vertices, textureCoords);
+		float[] normals = {
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1
+		};
+		
+		RawModel model = loader.loadToVAO(indices, vertices, textureCoords, normals);
 		Texture texture = new Texture(loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"));
+		texture.setShineDamper(10);
+		texture.setReflectivity(0.3f);
 		TexturedModel textureModel = new TexturedModel(model, texture);
-		Entity entity = new Entity(textureModel, new Vector3f(0, 0, -1), new Vector3f(), new Vector3f(1, 1, 1));
+		Entity entity = new Entity(textureModel, new Vector3f(0, 0.5f, -1), new Vector3f(), new Vector3f(1, 1, 1));
 		
 		Texture stallTexture = new Texture(loader.loadTexture("src/main/java/texture/stallTexture.png"));
 		TexturedModel stallModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/stall.obj"), stallTexture);
-		Entity stall = new Entity(stallModel, new Vector3f(0, -2.5f, -10), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1));
+		Entity stall = new Entity(stallModel, new Vector3f(7, 0, -10), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1));
 		
-		float s = 0.02f;
+		Texture girlTexture = new Texture(loader.loadColorTexture(Color.white));
+		TexturedModel girlModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/girl.obj"), girlTexture);
+		Entity girl = new Entity(girlModel, new Vector3f(-7, 0, -10), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
+		
+		Texture dragonTexture = new Texture(loader.loadColorTexture(Color.yellow));
+		dragonTexture.setShineDamper(10);
+		dragonTexture.setReflectivity(1);
+		TexturedModel dragonModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/dragon.obj"), dragonTexture);
+		Entity dragon = new Entity(dragonModel, new Vector3f(-7, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+		
+		Texture grassTerrain = new Texture(loader.loadTexture("src/main/java/texture/grass_block_top.png"));
+		Terrain terrain = new Terrain(0, -1, loader, grassTerrain);
+		Terrain terrain2 = new Terrain(-1, -1, loader, grassTerrain);
+		terrain2.setGrassColor(new Color(153, 255, 77));
 		
 		while(!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 			camera.move();
-			renderer.prepare();
-			textureShader.enable();
-			textureShader.setUniform4f("view", camera.createViewMatrix());
-			renderer.render(stall, textureShader);
-			renderer.render(entity, textureShader);
-			textureShader.disable();
+			renderer.addEntity(dragon);
+			renderer.addEntity(girl);
+			renderer.addEntity(stall);
+			renderer.addEntity(entity);
+			renderer.addTerrain(terrain);
+			renderer.addTerrain(terrain2);
+			renderer.render(light, camera);
 			glfwSwapBuffers(window);
-			stall.rotate(0, 1, 0);
-//			entity.move(0, 0, -0.01f);
-//			if(s > 0 && entity.getScale().x > 1.5f) s = -0.01f;
-//			else if(s < 0 && entity.getScale().x < 1) s = 0.02f;
-//			entity.zoom(1.3f * s, s, 0);
+			girl.rotate(0, 1, 0);
 			try {
 				Thread.sleep(16);
 			} catch (InterruptedException e) {
@@ -121,7 +140,7 @@ public class Window {
 			}
 		}
 		
-		shader.remove();
+		renderer.remove();
 		loader.clean();
 		glfwTerminate();
 	}

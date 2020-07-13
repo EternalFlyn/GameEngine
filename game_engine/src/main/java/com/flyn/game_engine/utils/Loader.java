@@ -1,5 +1,6 @@
 package com.flyn.game_engine.utils;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL11;
@@ -13,11 +14,12 @@ public class Loader {
 	
 	private ArrayList<Integer> vaos = new ArrayList<>(), vbos = new ArrayList<>(), textures = new ArrayList<>();
 	
-	public RawModel loadToVAO(int[] indices, float[] positions, float[] textureCoords) {
+	public RawModel loadToVAO(int[] indices, float[] vertices, float[] textureCoords, float[] normals) {
 		int vaoID = createVAO();
 		int indicesID = bindIndices(indices);
-		storeAttribute(0, 3, positions);
+		storeAttribute(0, 3, vertices);
 		storeAttribute(1, 2, textureCoords);
+		storeAttribute(2, 3, normals);
 		unbindVAO();
 		return new RawModel(vaoID, indicesID, indices.length);
 	}
@@ -30,6 +32,24 @@ public class Loader {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, img[0][0], img[0][1], 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(img[1]));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		return result;
+	}
+	
+	public int loadColorTexture(Color color) {
+		int pixel = color.getRGB();
+		int a = (pixel & 0xFF000000) >> 24;
+		int r = (pixel & 0xFF0000) >> 16;
+		int g = (pixel & 0xFF00) >> 8;
+		int b = (pixel & 0xFF);
+		int[] data = new int[] {a << 24 | b << 16 | g << 8 | r};
+		
+		int result = GL11.glGenTextures();
+		textures.add(result);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, result);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, 1, 1, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(data));
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		return result;
 	}
