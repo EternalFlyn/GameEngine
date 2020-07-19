@@ -20,6 +20,8 @@ public class MasterRenderer {
 	private static final float FOV = 70;
 	private static final float NEAR_PLANE = 0.1f, FAR_PLANE = 1000;
 	
+	private static Color SKYCOLOR = Color.white;
+	
 	private final float aspectRatio;
 	
 	private float hue = 0;
@@ -59,6 +61,7 @@ public class MasterRenderer {
 		entityShader.enable();
 		entityShader.setLight(light);
 		entityShader.setViewPosition(camera.createViewMatrix());
+		entityShader.setSkyColor(SKYCOLOR);
 		entityShader.setMinBrightness(minBrightness);
 		entityRenderer.render(entities);
 		entityShader.disable();
@@ -66,6 +69,7 @@ public class MasterRenderer {
 		terrainShader.enable();
 		terrainShader.setLight(light);
 		terrainShader.setViewPosition(camera.createViewMatrix());
+		terrainShader.setSkyColor(SKYCOLOR);
 		terrainShader.setMinBrightness(minBrightness);
 		terrainRenderer.render(terrains);
 		terrainShader.disable();
@@ -94,8 +98,8 @@ public class MasterRenderer {
 	public void prepare(float brightness) {
 		hue += 0.01f;
 		if(hue > 1) hue = 0;
-		Color backgroundColor = Color.getHSBColor(0.5f, 1, brightness);
-		GL11.glClearColor(backgroundColor.getRed() / 255f, backgroundColor.getGreen() / 255f, backgroundColor.getBlue() / 255f, backgroundColor.getAlpha() / 255f);
+		SKYCOLOR = Color.getHSBColor(0.5f, 1, brightness);
+		GL11.glClearColor(SKYCOLOR.getRed() / 255f, SKYCOLOR.getGreen() / 255f, SKYCOLOR.getBlue() / 255f, SKYCOLOR.getAlpha() / 255f);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 	}

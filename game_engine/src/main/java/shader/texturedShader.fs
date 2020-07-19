@@ -4,11 +4,13 @@ layout (location = 0) in vec2 coords;
 layout (location = 1) in vec3 surfaceNormal;
 layout (location = 2) in vec3 toLightVector;
 layout (location = 3) in vec3 toCameraVector;
+layout (location = 4) in float visibility;
 
 layout (location = 0) out vec4 pixelColor;
 
 uniform sampler2D textureSampler;
 uniform vec3 lightColor;
+uniform vec3 skyColor;
 uniform float shineDamper;
 uniform float reflectivity;
 uniform float minBrightness;
@@ -33,4 +35,5 @@ void main(void) {
 	}
 	
 	pixelColor = diffuse * textureColor + finalSpecular;
+	pixelColor = mix(vec4(skyColor, 1), pixelColor, visibility);
 }

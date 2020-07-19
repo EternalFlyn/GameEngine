@@ -45,12 +45,23 @@ public class TerrainShader extends ShaderProgram {
 	}
 	
 	public void setGrassColor(Color color) {
-		Vector3f colorVector = new Vector3f((float) color.getRed() / 255.0f, (float) color.getGreen() / 255.0f, (float) color.getBlue() / 255.0f);
-		setUniform3f("grassColor", colorVector);
+		setUniform3f("grassColor", Vector3f.colorVector(color));
+	}
+	
+	public void setSkyColor(Color color) {
+		setUniform3f("skyColor", Vector3f.colorVector(color));
 	}
 	
 	public void setMinBrightness(float level) {
 		setUniform1f("minBrightness", level);
+	}
+	
+	public void connectTextureUnit() {
+		setUniform1i("backgroundTexture", 0);
+		setUniform1i("rTexture", 1);
+		setUniform1i("gTexture", 2);
+		setUniform1i("bTexture", 3);
+		setUniform1i("blendMap", 4);
 	}
 	
 }

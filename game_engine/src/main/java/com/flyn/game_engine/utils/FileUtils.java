@@ -105,7 +105,6 @@ public class FileUtils {
 							normals[vertexNumber * 3 + 2] = normalVector.z;
 						}
 					}
-
 				}
 			}
 			reader.close();

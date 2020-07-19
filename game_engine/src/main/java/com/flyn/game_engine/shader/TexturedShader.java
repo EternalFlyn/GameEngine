@@ -1,7 +1,10 @@
 package com.flyn.game_engine.shader;
 
+import java.awt.Color;
+
 import com.flyn.game_engine.entity.Light;
 import com.flyn.game_engine.math.Matrix4f;
+import com.flyn.game_engine.math.Vector3f;
 
 public class TexturedShader extends ShaderProgram {
 
@@ -46,8 +49,12 @@ public class TexturedShader extends ShaderProgram {
 		else setUniform1f("useFakeLight", 0);
 	}
 	
+	public void setSkyColor(Color color) {
+		setUniform3f("skyColor", Vector3f.colorVector(color));
+	}
+	
 	public void setMinBrightness(float level) {
 		setUniform1f("minBrightness", level);
 	}
-	
+
 }

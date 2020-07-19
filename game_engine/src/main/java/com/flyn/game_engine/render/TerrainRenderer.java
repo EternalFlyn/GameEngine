@@ -20,6 +20,7 @@ public class TerrainRenderer {
 		this.shader = shader;
 		shader.enable();
 		shader.setProjection(projectionMatrix);
+		shader.connectTextureUnit();
 		shader.disable();
 	}
 
@@ -39,11 +40,22 @@ public class TerrainRenderer {
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glEnableVertexAttribArray(2);
-		Texture texture = terrain.getTexture();
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getID());
-		shader.setShineVariables(texture.getShineDamper(), texture.getReflectivity());
+		bindTextures(terrain);
+		shader.setShineVariables(1, 0);
 		shader.setGrassColor(terrain.getGrassColor());
+	}
+	
+	private void bindTextures(Terrain terrain) {
+		GL13.glActiveTexture(GL13.GL_TEXTURE0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrain.getBackgroundTexture().getID());
+		GL13.glActiveTexture(GL13.GL_TEXTURE1);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrain.getRTexture().getID());
+		GL13.glActiveTexture(GL13.GL_TEXTURE2);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrain.getGTexture().getID());
+		GL13.glActiveTexture(GL13.GL_TEXTURE3);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrain.getBTexture().getID());
+		GL13.glActiveTexture(GL13.GL_TEXTURE4);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrain.getBlendMap().getID());
 	}
 	
 	private void unbindTexturedModel() {

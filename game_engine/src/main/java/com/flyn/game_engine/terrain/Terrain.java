@@ -16,12 +16,16 @@ public class Terrain {
 	private float x, z;
 	private Color grassColor = new Color(124, 252, 0);
 	private RawModel model;
-	private Texture texture;
+	private Texture backgroundTexture, rTexture, gTexture, bTexture, blendMap;
 
-	public Terrain(int gridX, int gridZ, Loader loader, Texture texture) {
-		this.texture = texture;
+	public Terrain(int gridX, int gridZ, Loader loader) {
 		x = gridX * SIZE;
 		z = gridZ * SIZE;
+		backgroundTexture = new Texture(loader.loadTexture("src/main/java/texture/grass_block_top.png"));
+		rTexture = new Texture(loader.loadTexture("src/main/java/texture/sand.png"));
+		gTexture = new Texture(loader.loadTexture("src/main/java/texture/chiseled_quartz_block.png"));
+		bTexture = new Texture(loader.loadTexture("src/main/java/texture/stone_bricks.png"));
+		blendMap = new Texture(loader.loadTexture("src/main/java/texture/blendMap.png"));
 		model = generateTerrain(loader);
 	}
 
@@ -73,8 +77,24 @@ public class Terrain {
 		return model;
 	}
 
-	public Texture getTexture() {
-		return texture;
+	public Texture getBackgroundTexture() {
+		return backgroundTexture;
+	}
+
+	public Texture getRTexture() {
+		return rTexture;
+	}
+
+	public Texture getGTexture() {
+		return gTexture;
+	}
+
+	public Texture getBTexture() {
+		return bTexture;
+	}
+
+	public Texture getBlendMap() {
+		return blendMap;
 	}
 
 	public Color getGrassColor() {

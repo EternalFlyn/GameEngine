@@ -8,7 +8,7 @@ import com.flyn.game_engine.window.Window;
 
 public class Camera {
 	
-	private Vector3f position = new Vector3f(), rotation = new Vector3f();
+	private Vector3f position = new Vector3f(0, 1, 1), rotation = new Vector3f();
 	
 	public void move() {
 		if(Window.input.isKeyPressed(KeyEvent.VK_W)) position.z -= 0.02f;

@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL;
 import com.flyn.game_engine.entity.Camera;
 import com.flyn.game_engine.entity.Entity;
 import com.flyn.game_engine.entity.Light;
+import com.flyn.game_engine.entity.Player;
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.render.MasterRenderer;
 import com.flyn.game_engine.render.RawModel;
@@ -29,6 +30,8 @@ public class Window {
 	
 	public static long time = 0;
 	public static Input input = new Input();
+	
+	private static long currentFrameTime = 0, lastFrameTime = 0;
 	
 	private int width = 0, height = 0;
 	private long window, startedTime = 0;
@@ -112,6 +115,7 @@ public class Window {
 		Texture girlTexture = new Texture(loader.loadColorTexture(Color.white));
 		TexturedModel girlModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/girl.obj"), girlTexture);
 		Entity girl = new Entity(girlModel, new Vector3f(-7, 0, -10), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
+		Player player = new Player(girlModel, new Vector3f(0, 0, -1), new Vector3f(-90, 180, 0), new Vector3f(0.1f, 0.1f, 0.1f));
 		
 		Texture dragonTexture = new Texture(loader.loadColorTexture(Color.yellow));
 		dragonTexture.setShineDamper(10);
@@ -130,15 +134,18 @@ public class Window {
 			poppys[i] = new Entity(poppyModel, new Vector3f(x, 0, z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
 		}
 		
-		Texture grassTerrain = new Texture(loader.loadTexture("src/main/java/texture/grass_block_top.png"));
-		Terrain terrain = new Terrain(0, -1, loader, grassTerrain);
-		Terrain terrain2 = new Terrain(-1, -1, loader, grassTerrain);
+		Terrain terrain = new Terrain(0, -1, loader);
+		Terrain terrain2 = new Terrain(-1, -1, loader);
 		terrain2.setGrassColor(new Color(153, 255, 77));
 		
 		while(!glfwWindowShouldClose(window)) {
 			time = System.currentTimeMillis() - startedTime;
+			lastFrameTime = currentFrameTime;
+			currentFrameTime = System.currentTimeMillis();
 			glfwPollEvents();
-			camera.move();
+//			camera.move();
+			player.move();
+			renderer.addEntity(player);
 			renderer.addEntity(dragon);
 			renderer.addEntity(girl);
 			renderer.addEntity(stall);
@@ -159,6 +166,10 @@ public class Window {
 		renderer.remove();
 		loader.clean();
 		glfwTerminate();
+	}
+	
+	public static float getFrameTimeSeconds() {
+		return (currentFrameTime - lastFrameTime) / 1000f;
 	}
 	
 }

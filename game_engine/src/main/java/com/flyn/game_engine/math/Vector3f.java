@@ -1,5 +1,7 @@
 package com.flyn.game_engine.math;
 
+import java.awt.Color;
+
 public class Vector3f {
 
 	public float x, y, z;
@@ -14,5 +16,12 @@ public class Vector3f {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+	}
+	
+	public static Vector3f colorVector(Color color) {
+		float r = color.getRed() / 255f;
+		float g = color.getGreen() / 255f;
+		float b = color.getBlue() / 255f;
+		return new Vector3f(r, g, b);
 	}
 }
