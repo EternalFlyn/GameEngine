@@ -2,6 +2,6 @@ package com.flyn.game_engine.window.input;
 
 public interface MouseMotionInterface {
 
-	public void mouseMotion(double x, double y);
+	public void mouseMotion(int x, int y);
 	
 }

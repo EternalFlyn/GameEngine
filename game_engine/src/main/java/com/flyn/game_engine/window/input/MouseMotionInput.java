@@ -1,14 +1,17 @@
 package com.flyn.game_engine.window.input;
 
+import java.util.ArrayList;
+
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 
 public class MouseMotionInput extends GLFWCursorPosCallback {
 	
-	private double x, y;
-	private MouseMotionInterface window;
+	private static ArrayList<MouseMotionInterface> interfaces = new ArrayList<>();
 	
-	public MouseMotionInput(MouseMotionInterface window) {
-		this.window = window;
+	private double x, y;
+	
+	public static void addMouseMotionListener(MouseMotionInterface mouseMotionInterface) {
+		interfaces.add(mouseMotionInterface);
 	}
 
 	@Override
@@ -16,7 +19,7 @@ public class MouseMotionInput extends GLFWCursorPosCallback {
 		if(x != xpos || y != ypos) {
 			x = xpos;
 			y = ypos;
-			this.window.mouseMotion(xpos, ypos);
+			for(MouseMotionInterface i : interfaces) i.mouseMotion((int) xpos, (int) ypos);
 		}
 	}
 

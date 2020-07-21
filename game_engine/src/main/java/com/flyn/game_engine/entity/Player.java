@@ -1,10 +1,11 @@
 package com.flyn.game_engine.entity;
 
-import java.awt.event.KeyEvent;
+import org.lwjgl.glfw.GLFW;
 
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.render.TexturedModel;
 import com.flyn.game_engine.window.Window;
+import com.flyn.game_engine.window.input.KeyInput;
 
 public class Player extends Entity {
 	
@@ -32,15 +33,15 @@ public class Player extends Entity {
 	}
 	
 	private void checkInputs() {
-		if(Window.input.isKeyPressed(KeyEvent.VK_W)) currentSpeed = WALK_SPEED;
-		else if(Window.input.isKeyPressed(KeyEvent.VK_S)) currentSpeed = -WALK_SPEED;
+		if(KeyInput.isKeyPressed(GLFW.GLFW_KEY_W)) currentSpeed = WALK_SPEED;
+		else if(KeyInput.isKeyPressed(GLFW.GLFW_KEY_S)) currentSpeed = -WALK_SPEED;
 		else currentSpeed = 0;
 		
-		if(Window.input.isKeyPressed(KeyEvent.VK_A)) currentTurnSpeed = TURN_SPEED;
-		else if(Window.input.isKeyPressed(KeyEvent.VK_D)) currentTurnSpeed = -TURN_SPEED;
+		if(KeyInput.isKeyPressed(GLFW.GLFW_KEY_A)) currentTurnSpeed = TURN_SPEED;
+		else if(KeyInput.isKeyPressed(GLFW.GLFW_KEY_D)) currentTurnSpeed = -TURN_SPEED;
 		else currentTurnSpeed = 0;
 		
-		if(Window.input.isKeyPressed(KeyEvent.VK_SPACE) && !isJump) {
+		if(KeyInput.isKeyPressed(GLFW.GLFW_KEY_SPACE) && !isJump) {
 			ySpeed = JUMP_POWER;
 			isJump = true;
 		}

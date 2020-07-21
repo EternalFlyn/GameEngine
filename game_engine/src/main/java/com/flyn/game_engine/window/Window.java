@@ -25,11 +25,11 @@ import com.flyn.game_engine.utils.Loader;
 import com.flyn.game_engine.window.input.KeyInput;
 import com.flyn.game_engine.window.input.MouseInput;
 import com.flyn.game_engine.window.input.MouseMotionInput;
+import com.flyn.game_engine.window.input.WheelInput;
 
 public class Window {
 	
 	public static long time = 0;
-	public static Input input = new Input();
 	
 	private static long currentFrameTime = 0, lastFrameTime = 0;
 	
@@ -59,10 +59,10 @@ public class Window {
 		glfwSetWindowPos(window, (vidmode.width() - width) / 2, (vidmode.height() - height) / 2); //設定螢幕位置
 		
 		//設定鍵盤和滑鼠輸入
-		glfwSetKeyCallback(window, new KeyInput(input));
-		glfwSetMouseButtonCallback(window, new MouseInput(input));
-		glfwSetCursorPosCallback(window, new MouseMotionInput(input));
-		
+		glfwSetKeyCallback(window, new KeyInput());
+		glfwSetMouseButtonCallback(window, new MouseInput());
+		glfwSetCursorPosCallback(window, new MouseMotionInput());
+		glfwSetScrollCallback(window, new WheelInput());
 	}
 	
 	public void showWindow() {
@@ -76,7 +76,6 @@ public class Window {
 		Loader loader = new Loader();
 		MasterRenderer renderer = new MasterRenderer(width, height);
 		Light light = new Light(new Vector3f(0, 1, 0), new Vector3f(1, 1, 1));
-		Camera camera = new Camera();
 		
 		int[] indices = {0, 1, 2, 2, 3, 0};
 		
@@ -116,6 +115,7 @@ public class Window {
 		TexturedModel girlModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/girl.obj"), girlTexture);
 		Entity girl = new Entity(girlModel, new Vector3f(-7, 0, -10), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
 		Player player = new Player(girlModel, new Vector3f(0, 0, -1), new Vector3f(-90, 180, 0), new Vector3f(0.1f, 0.1f, 0.1f));
+		Camera camera = new Camera(player);
 		
 		Texture dragonTexture = new Texture(loader.loadColorTexture(Color.yellow));
 		dragonTexture.setShineDamper(10);
@@ -143,8 +143,8 @@ public class Window {
 			lastFrameTime = currentFrameTime;
 			currentFrameTime = System.currentTimeMillis();
 			glfwPollEvents();
-//			camera.move();
 			player.move();
+			camera.move();
 			renderer.addEntity(player);
 			renderer.addEntity(dragon);
 			renderer.addEntity(girl);
