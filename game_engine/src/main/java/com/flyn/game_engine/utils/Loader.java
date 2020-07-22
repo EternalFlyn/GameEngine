@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
@@ -12,9 +13,9 @@ import com.flyn.game_engine.render.RawModel;
 
 public class Loader {
 	
-	private ArrayList<Integer> vaos = new ArrayList<>(), vbos = new ArrayList<>(), textures = new ArrayList<>();
+	private static ArrayList<Integer> vaos = new ArrayList<>(), vbos = new ArrayList<>(), textures = new ArrayList<>();
 	
-	public RawModel loadToVAO(int[] indices, float[] vertices, float[] textureCoords, float[] normals) {
+	public static RawModel loadToVAO(int[] indices, float[] vertices, float[] textureCoords, float[] normals) {
 		int vaoID = createVAO();
 		int indicesID = bindIndices(indices);
 		storeAttribute(0, 3, vertices);
@@ -24,19 +25,21 @@ public class Loader {
 		return new RawModel(vaoID, indicesID, indices.length);
 	}
 	
-	public int loadTexture(String ImagePath) {
+	public static int loadTexture(String ImagePath) {
 		int[][] img = FileUtils.loadImage(ImagePath);
 		int result = GL11.glGenTextures();
 		textures.add(result);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, result);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, -0.4f);
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, img[0][0], img[0][1], 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(img[1]));
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		return result;
 	}
 	
-	public int loadColorTexture(Color color) {
+	public static int loadColorTexture(Color color) {
 		int pixel = color.getRGB();
 		int a = (pixel & 0xFF000000) >> 24;
 		int r = (pixel & 0xFF0000) >> 16;
@@ -54,20 +57,20 @@ public class Loader {
 		return result;
 	}
 	
-	public void clean() {
+	public static void clean() {
 		for(int vao : vaos) GL30.glDeleteVertexArrays(vao);
 		for(int vbo : vbos) GL15.glDeleteBuffers(vbo);
 		for(int texture : textures) GL11.glDeleteTextures(texture);
 	}
 	
-	private int createVAO() {
+	private static int createVAO() {
 		int vaoID = GL30.glGenVertexArrays();
 		vaos.add(vaoID);
 		GL30.glBindVertexArray(vaoID);
 		return vaoID;
 	}
 	
-	private void storeAttribute(int attributeNumber, int dataSize, float[] data) {
+	private static void storeAttribute(int attributeNumber, int dataSize, float[] data) {
 		int vboID = GL15.glGenBuffers();
 		vbos.add(vboID);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
@@ -76,7 +79,7 @@ public class Loader {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	}
 	
-	private int bindIndices(int[] indices) {
+	private static int bindIndices(int[] indices) {
 		int vboID = GL15.glGenBuffers();
 		vbos.add(vboID);
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboID);
@@ -85,7 +88,7 @@ public class Loader {
 		return vboID;
 	}
 	
-	private void unbindVAO() {
+	private static void unbindVAO() {
 		GL30.glBindVertexArray(0);
 	}
 

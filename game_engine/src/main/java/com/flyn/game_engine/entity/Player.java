@@ -3,7 +3,9 @@ package com.flyn.game_engine.entity;
 import org.lwjgl.glfw.GLFW;
 
 import com.flyn.game_engine.math.Vector3f;
-import com.flyn.game_engine.render.TexturedModel;
+import com.flyn.game_engine.render.RawModel;
+import com.flyn.game_engine.render.Texture;
+import com.flyn.game_engine.terrain.Terrain;
 import com.flyn.game_engine.window.Window;
 import com.flyn.game_engine.window.input.KeyInput;
 
@@ -14,21 +16,22 @@ public class Player extends Entity {
 	private float currentSpeed = 0, currentTurnSpeed = 0, ySpeed = 0;
 	private boolean isJump = false;
 
-	public Player(TexturedModel model, Vector3f position, Vector3f rotation, Vector3f scale) {
-		super(model, position, rotation, scale);
+	public Player(RawModel model, Texture texture, Vector3f position, Vector3f rotation, Vector3f scale) {
+		super(model, texture, position, rotation, scale);
 	}
 	
-	public void move() {
+	public void move(Terrain terrain) {
 		checkInputs();
 		float frameTime = Window.getFrameTimeSeconds();
 		rotate(0, currentTurnSpeed * frameTime, 0);
 		float distance = currentSpeed * frameTime, pitch = (float) Math.toRadians(getRotation().y);
 		ySpeed += GRAVITY * frameTime;
 		move(distance * (float) Math.sin(pitch), ySpeed * frameTime, distance * (float) Math.cos(pitch));
-		if(getPosition().y < 0){
+		float terrainHeight = terrain.getHeight(getPosition().x * getScale().x, getPosition().z * getScale().z);
+		if(getPosition().y < terrainHeight * 10){
 			ySpeed = 0;
 			isJump = false;
-			setPosition(new Vector3f(getPosition().x, 0, getPosition().z));
+			setPosition(new Vector3f(getPosition().x, terrainHeight * 10, getPosition().z));
 		}
 	}
 	

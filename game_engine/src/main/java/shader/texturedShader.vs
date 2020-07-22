@@ -15,6 +15,8 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform vec3 lightPosition;
 uniform float useFakeLight;
+uniform vec2 textureAmount;
+uniform vec2 textureOffset;
 
 const float fogDensity = 0.01;
 const float forGradient = 1.5;
@@ -23,7 +25,7 @@ void main() {
 	vec4 worldPosition = transformation * position;
 	vec4 positionToCamera = view * worldPosition;
 	gl_Position = projection * positionToCamera;
-	coords = texturedCoords;
+	coords = vec2(texturedCoords.x / textureAmount.x, texturedCoords.y / textureAmount.y) + textureOffset;
 	
 	vec3 actualNormal = normal;
 	if(useFakeLight > 0.5) {

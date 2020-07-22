@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -15,6 +16,8 @@ import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.render.RawModel;
 
 public class FileUtils {
+	
+	private static HashMap<String, RawModel> models = new HashMap<>();
 
 	private FileUtils() {}
 
@@ -57,7 +60,8 @@ public class FileUtils {
 		return new int[][] {{width, height}, data};
 	}
 
-	public static RawModel loadObjFile(Loader loader, String filePath) {
+	public static RawModel loadObjFile(String filePath) {
+		if(models.containsKey(filePath)) return models.get(filePath);
 		HashSet<Integer> NumberList = new HashSet<>();
 		ArrayList<Float> verticesArray = new ArrayList<>();
 		ArrayList<Vector3f> texturesArray = new ArrayList<>(), normalsArray = new ArrayList<>();
@@ -115,7 +119,9 @@ public class FileUtils {
 			System.err.println("Couldn't find the file : " + filePath);
 			e.printStackTrace();
 		}
-		return loader.loadToVAO(indices, vertices, textures, normals);
+		RawModel model = Loader.loadToVAO(indices, vertices, textures, normals);
+		models.put(filePath, model);
+		return model;
 	}
 
 }

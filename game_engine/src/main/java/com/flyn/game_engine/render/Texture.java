@@ -3,11 +3,17 @@ package com.flyn.game_engine.render;
 public class Texture {
 
 	private boolean transparency = false, useFakeLight = false;
-	private int textureID;
+	private int textureID, column = 1, row = 1;
 	private float shineDamper = 1, reflectivity = 0;
 	
 	public Texture(int textureID) {
 		this.textureID = textureID;
+	}
+	
+	public Texture(int textureID, int col, int row) {
+		this.textureID = textureID;
+		this.column = col;
+		this.row = row;
 	}
 	
 	public int getID() {
@@ -44,6 +50,14 @@ public class Texture {
 
 	public void setUsedFakeLight(boolean useFakeLight) {
 		this.useFakeLight = useFakeLight;
+	}
+	
+	public int getColumn() {
+		return column;
+	}
+
+	public int getRow() {
+		return row;
 	}
 
 }

@@ -24,4 +24,11 @@ public class Vector3f {
 		float b = color.getBlue() / 255f;
 		return new Vector3f(r, g, b);
 	}
+	
+	public Vector3f normalise() {
+		double dx = x, dy = y, dz = z;
+		float norm = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+		Vector3f result = new Vector3f(x / norm, y / norm, z / norm);
+		return result;
+	}
 }

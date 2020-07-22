@@ -26,28 +26,36 @@ public class EntityRenderer {
 		shader.disable();
 	}
 	
-	public void render(HashMap<TexturedModel, ArrayList<Entity>> entities) {
-		Iterator<Entry<TexturedModel, ArrayList<Entity>>> iter = entities.entrySet().iterator();
-		while(iter.hasNext()) {
-			Entry<TexturedModel, ArrayList<Entity>> entry = iter.next();
-			TexturedModel model = entry.getKey();
-			prepareTexturedModel(model);
-			for(Entity entity : entry.getValue()) {
-				shader.setTransformation(entity.getTransformationMatirx());
-				GL11.glDrawElements(GL11.GL_TRIANGLES, model.getModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+	public void render(HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities) {
+		Iterator<Entry<RawModel, HashMap<Texture, ArrayList<Entity>>>> modelIter = entities.entrySet().iterator();
+		while(modelIter.hasNext()) {
+			Entry<RawModel, HashMap<Texture, ArrayList<Entity>>> modelEntry = modelIter.next();
+			RawModel model = modelEntry.getKey();
+			prepareModel(model);
+			Iterator<Entry<Texture, ArrayList<Entity>>> textureIter = modelEntry.getValue().entrySet().iterator();
+			while(textureIter.hasNext()) {
+				Entry<Texture, ArrayList<Entity>> textureEntry = textureIter.next();
+				prepareTexture(textureEntry.getKey());
+				for(Entity entity : textureEntry.getValue()) {
+					shader.setTransformation(entity.getTransformationMatirx());
+					shader.setTextureOffset(entity.getTextureXOffset(), entity.getTextureYOffset());
+					GL11.glDrawElements(GL11.GL_TRIANGLES, model.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+				}
 			}
-			unbindTexturedModel();
+			unbind();
 		}
 	}
 	
-	private void prepareTexturedModel(TexturedModel model) {
-		RawModel rawModel = model.getModel();
-		GL30.glBindVertexArray(rawModel.getVaoID());
-		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, rawModel.getIndicesID());
+	private void prepareModel(RawModel model) {
+		GL30.glBindVertexArray(model.getVaoID());
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, model.getIndicesID());
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glEnableVertexAttribArray(2);
-		Texture texture = model.getTexture();
+	}
+	
+	private void prepareTexture(Texture texture) {
+		shader.setTextureAmount(texture.getColumn(), texture.getRow());
 		if(texture.hasTransparency()) MasterRenderer.disableCulling();
 		shader.setUsedFakeLight(texture.isUsedFakeLight());
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -55,7 +63,7 @@ public class EntityRenderer {
 		shader.setShineVariables(texture.getShineDamper(), texture.getReflectivity());
 	}
 	
-	private void unbindTexturedModel() {
+	private void unbind() {
 		MasterRenderer.disableCulling();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		GL20.glDisableVertexAttribArray(0);

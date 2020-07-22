@@ -1,21 +1,51 @@
 package com.flyn.game_engine.entity;
 
+import java.awt.Color;
+
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
-import com.flyn.game_engine.render.TexturedModel;
+import com.flyn.game_engine.render.RawModel;
+import com.flyn.game_engine.render.Texture;
+import com.flyn.game_engine.utils.Loader;
 
 public class Entity {
 	
-	private TexturedModel model;
+	private int texturedIndex = 0;
+	private RawModel model;
+	private Texture texture;
 	private Vector3f position, rotation, scale;
 	private Matrix4f transformationMatirx;
 	
-	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, Vector3f scale) {
+	public Entity(RawModel model, Texture texture, Vector3f position, Vector3f rotation, Vector3f scale) {
 		this.model = model;
+		this.texture = texture;
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
 		updateMatrix();
+	}
+	
+	protected Entity(RawModel model, Vector3f position, Vector3f rotation, Vector3f scale) {
+		this.model = model;
+		this.texture = new Texture(Loader.loadColorTexture(Color.white));
+		this.position = position;
+		this.rotation = rotation;
+		this.scale = scale;
+		updateMatrix();
+	}
+
+	public float getTextureXOffset() {
+		int col = texturedIndex % texture.getColumn();
+		return (float) col / (float) texture.getColumn();
+	}
+	
+	public float getTextureYOffset() {
+		int row = texturedIndex % texture.getRow();
+		return (float) row / (float) texture.getRow();
+	}
+	
+	public void setTextureIndex(int index) {
+		texturedIndex = index;
 	}
 	
 	private void updateMatrix() {
@@ -73,8 +103,16 @@ public class Entity {
 		updateMatrix();
 	}
 	
-	public TexturedModel getModel() {
+	public RawModel getModel() {
 		return model;
+	}
+	
+	public Texture getTexture() {
+		return texture;
+	}
+
+	protected void setTexture(Texture texture) {
+		this.texture = texture;
 	}
 
 	public Matrix4f getTransformationMatirx() {

@@ -11,14 +11,18 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
 import com.flyn.game_engine.entity.Camera;
+import com.flyn.game_engine.entity.Dragon;
 import com.flyn.game_engine.entity.Entity;
 import com.flyn.game_engine.entity.Light;
+import com.flyn.game_engine.entity.Painting;
 import com.flyn.game_engine.entity.Player;
+import com.flyn.game_engine.entity.Poppy;
+import com.flyn.game_engine.entity.Stall;
+import com.flyn.game_engine.entity.Torch;
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.render.MasterRenderer;
 import com.flyn.game_engine.render.RawModel;
 import com.flyn.game_engine.render.Texture;
-import com.flyn.game_engine.render.TexturedModel;
 import com.flyn.game_engine.terrain.Terrain;
 import com.flyn.game_engine.utils.FileUtils;
 import com.flyn.game_engine.utils.Loader;
@@ -73,77 +77,47 @@ public class Window {
 		System.out.println("version : " + glGetString(GL_VERSION));
 		
 		startedTime = System.currentTimeMillis();
-		Loader loader = new Loader();
 		MasterRenderer renderer = new MasterRenderer(width, height);
 		Light light = new Light(new Vector3f(0, 1, 0), new Vector3f(1, 1, 1));
 		
-		int[] indices = {0, 1, 2, 2, 3, 0};
+		Terrain terrain = new Terrain(0, -1);
+//		Terrain terrain2 = new Terrain(-1, -1);
+//		terrain2.setGrassColor(new Color(153, 255, 77));
 		
-		float[] vertices = {
-				0.5f, 0.5f, 0,
-				-0.5f, 0.5f, 0,
-				-0.5f, -0.5f, 0,
-				0.5f, -0.5f, 0
-		};
-		
-		float[] textureCoords = {
-			1, 0,
-			0, 0,
-			0, 1,
-			1, 1
-		};
-		
-		float[] normals = {
-			0, 0, 1,
-			0, 0, 1,
-			0, 0, 1,
-			0, 0, 1
-		};
-		
-		RawModel model = loader.loadToVAO(indices, vertices, textureCoords, normals);
-		Texture texture = new Texture(loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"));
+		Texture texture = new Texture(Loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"));
 		texture.setShineDamper(10);
 		texture.setReflectivity(0.3f);
-		TexturedModel textureModel = new TexturedModel(model, texture);
-		Entity entity = new Entity(textureModel, new Vector3f(0, 0.5f, -1), new Vector3f(), new Vector3f(1, 1, 1));
+		Painting entity = new Painting(texture, new Vector3f(0, 0.5f, -1), new Vector3f(), new Vector3f(1, 1, 1));
 		
-		Texture stallTexture = new Texture(loader.loadTexture("src/main/java/texture/stallTexture.png"));
-		TexturedModel stallModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/stall.obj"), stallTexture);
-		Entity stall = new Entity(stallModel, new Vector3f(7, 0, -10), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1));
+		Stall stall = new Stall(new Vector3f(7, 0, -10), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1));
+		Dragon dragon = new Dragon(new Vector3f(-7, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
 		
-		Texture girlTexture = new Texture(loader.loadColorTexture(Color.white));
-		TexturedModel girlModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/girl.obj"), girlTexture);
-		Entity girl = new Entity(girlModel, new Vector3f(-7, 0, -10), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
-		Player player = new Player(girlModel, new Vector3f(0, 0, -1), new Vector3f(-90, 180, 0), new Vector3f(0.1f, 0.1f, 0.1f));
+		Texture girlTexture = new Texture(Loader.loadColorTexture(Color.white));
+		RawModel girlModel = FileUtils.loadObjFile("src/main/java/model/girl.obj");
+		Entity girl = new Entity(girlModel, girlTexture, new Vector3f(-7, 0, -10), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
+		Player player = new Player(girlModel, girlTexture, new Vector3f(0, 0, -1), new Vector3f(-90, 180, 0), new Vector3f(0.1f, 0.1f, 0.1f));
 		Camera camera = new Camera(player);
 		
-		Texture dragonTexture = new Texture(loader.loadColorTexture(Color.yellow));
-		dragonTexture.setShineDamper(10);
-		dragonTexture.setReflectivity(1);
-		TexturedModel dragonModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/dragon.obj"), dragonTexture);
-		Entity dragon = new Entity(dragonModel, new Vector3f(-7, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
-		
-		Texture poppyTexture = new Texture(loader.loadTexture("src/main/java/texture/poppy.png"));
-		poppyTexture.setTransparency(true);
-		poppyTexture.setUsedFakeLight(true);
-		TexturedModel poppyModel = new TexturedModel(FileUtils.loadObjFile(loader, "src/main/java/model/poppy.obj"), poppyTexture);
-		Entity[] poppys = new Entity[100];
+		Poppy[] poppys = new Poppy[100];
 		for(int i = 0; i < poppys.length; i++) {
 			Random ran = new Random();
 			float x = ran.nextFloat() * 20 - 10, z = ran.nextFloat() * 20 - 10;
-			poppys[i] = new Entity(poppyModel, new Vector3f(x, 0, z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+			poppys[i] = new Poppy(new Vector3f(x, terrain.getHeight(x, z), z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
 		}
 		
-		Terrain terrain = new Terrain(0, -1, loader);
-		Terrain terrain2 = new Terrain(-1, -1, loader);
-		terrain2.setGrassColor(new Color(153, 255, 77));
-		
+		Torch[] torchs = new Torch[100];
+		for(int i = 0; i < torchs.length; i++) {
+			Random ran = new Random();
+			float x = ran.nextFloat() * 20 - 10, z = ran.nextFloat() * 20 - 10;
+			torchs[i] = new Torch(new Vector3f(x, terrain.getHeight(x, z), z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+		}
+
 		while(!glfwWindowShouldClose(window)) {
 			time = System.currentTimeMillis() - startedTime;
 			lastFrameTime = currentFrameTime;
 			currentFrameTime = System.currentTimeMillis();
 			glfwPollEvents();
-			player.move();
+			player.move(terrain);
 			camera.move();
 			renderer.addEntity(player);
 			renderer.addEntity(dragon);
@@ -151,20 +125,20 @@ public class Window {
 			renderer.addEntity(stall);
 			renderer.addEntity(entity);
 			for(Entity poppy : poppys) renderer.addEntity(poppy);
+			for(Entity torch : torchs) {
+				torch.setTextureIndex((int) (time / 250) % 7);
+				renderer.addEntity(torch);
+			}
 			renderer.addTerrain(terrain);
-			renderer.addTerrain(terrain2);
+//			renderer.addTerrain(terrain2);
 			renderer.render(light, camera);
 			glfwSwapBuffers(window);
 			girl.rotate(0, 1, 0);
-			try {
-				Thread.sleep(16);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+//			System.out.println("FPS:" + 1 / getFrameTimeSeconds());
 		}
 		
 		renderer.remove();
-		loader.clean();
+		Loader.clean();
 		glfwTerminate();
 	}
 	

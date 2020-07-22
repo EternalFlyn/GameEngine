@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.flyn.game_engine.math.SimplexNoise2D;
+import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.window.Window;
 
 public class App {
@@ -18,7 +19,28 @@ public class App {
 			window.setWindow("Test", 800, 600);
 			window.showWindow();
 		}).start();
+//		float x = 0.001f, y = 1.000f;
+//		Vector3f p1 = new Vector3f(0, 100000, 0);
+//		Vector3f p2 = new Vector3f(1, -0, 0);
+//		Vector3f p3 = new Vector3f(0, 0, 1);
+//		long ta = System.nanoTime();
+//		float bc = baryCentric(p2, p3, p1, x, y);
+//		long tb = System.nanoTime();
+//		float my = test(p1, p2, p3, x, y);
+//		long tc = System.nanoTime();
+//		System.out.printf("bc : %f, my : %f, d : %f%n", bc, my, bc - my);
+//		System.out.printf("t1 : %d, t2 : %d", tb - ta, tc - tb);
 //		new Window();
+	}
+	
+
+	
+	public static float test(Vector3f p1, Vector3f p2, Vector3f p3, float x, float y) {
+		float xy = x + y;
+		float y1 = xy * (p2.y - p1.y) / p2.x + p1.y;
+		float y2 = xy * (p3.y - p1.y) / p3.z + p1.y;
+		float r = x / xy;
+		return r * y1 + (1 - r) * y2;
 	}
 	
 	private static class TestFrame extends JPanel {

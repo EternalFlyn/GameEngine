@@ -33,7 +33,7 @@ public class MasterRenderer {
 	private TerrainShader terrainShader = new TerrainShader();
 	private TerrainRenderer terrainRenderer;
 	
-	private HashMap<TexturedModel, ArrayList<Entity>> entities = new HashMap<>();
+	private HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities = new HashMap<>();
 	private ArrayList<Terrain> terrains = new ArrayList<>();
 	
 	public MasterRenderer(int width, int height) {
@@ -56,6 +56,7 @@ public class MasterRenderer {
 	public void render(Light light, Camera camera) {
 		float brightnessFactor = 1 - (float) (Window.time % 30000) / 15000.0f;
 		float minBrightness = 0.6f * (brightnessFactor * brightnessFactor) + 0.1f;
+		minBrightness = 0.7f;
 		prepare(minBrightness);
 		
 		entityShader.enable();
@@ -83,14 +84,24 @@ public class MasterRenderer {
 	}
 	
 	public void addEntity(Entity entity) {
-		TexturedModel model = entity.getModel();
+		RawModel model = entity.getModel();
+		Texture texture = entity.getTexture();
 		ArrayList<Entity> list;
 		if(entities.containsKey(model)) {
-			list = entities.get(model);
+			HashMap<Texture, ArrayList<Entity>> textureMap = entities.get(model);
+			if(textureMap.containsKey(texture)) {
+				list = entities.get(model).get(texture);
+			}
+			else {
+				list = new ArrayList<>();
+				textureMap.put(texture, list);
+			}
 		}
 		else {
+			HashMap<Texture, ArrayList<Entity>> textureMap = new HashMap<>();
 			list = new ArrayList<>();
-			entities.put(model, list);
+			textureMap.put(texture, list);
+			entities.put(model, textureMap);
 		}
 		list.add(entity);
 	}

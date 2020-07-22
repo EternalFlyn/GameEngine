@@ -53,6 +53,14 @@ public class TexturedShader extends ShaderProgram {
 		setUniform3f("skyColor", Vector3f.colorVector(color));
 	}
 	
+	public void setTextureAmount(int col, int row) {
+		setUniform2f("textureAmount", col, row);
+	}
+	
+	public void setTextureOffset(float x, float y) {
+		setUniform2f("textureOffset", x, y);
+	}
+	
 	public void setMinBrightness(float level) {
 		setUniform1f("minBrightness", level);
 	}
