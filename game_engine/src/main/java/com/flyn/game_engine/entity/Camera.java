@@ -30,9 +30,9 @@ public class Camera implements MouseMotionInterface, WheelInterface {
 		float x = horizontalDistance * (float) Math.sin(angleX + playerPitch);
 		float y = distanceFromPlayer * (float) Math.sin(angleY);
 		float z = horizontalDistance * (float) Math.cos(angleX + playerPitch);
-		position.x = player.getPosition().x * player.getScale().x - x;
-		position.y = player.getPosition().y * player.getScale().y + y + 0.5f;
-		position.z = player.getPosition().z * player.getScale().z - z;
+		position.x = player.getPosition().x - x;
+		position.y = player.getPosition().y + y + 0.5f;
+		position.z = player.getPosition().z - z;
 	}
 
 	public Matrix4f createViewMatrix() {

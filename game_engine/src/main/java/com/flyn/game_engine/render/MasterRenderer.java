@@ -13,18 +13,19 @@ import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.shader.TerrainShader;
 import com.flyn.game_engine.shader.TexturedShader;
 import com.flyn.game_engine.terrain.Terrain;
+import com.flyn.game_engine.window.ExecuteInterface;
 import com.flyn.game_engine.window.Window;
 
-public class MasterRenderer {
+public class MasterRenderer implements ExecuteInterface {
 	
-	private static final float FOV = 70;
-	private static final float NEAR_PLANE = 0.1f, FAR_PLANE = 1000;
+	public static final float FOV = 70;
+	public static final float NEAR_PLANE = 0.1f, FAR_PLANE = 1000;
 	
-	private static Color SKYCOLOR = Color.white;
+	private static Color skyColor = Color.white;
 	
 	private final float aspectRatio;
 	
-	private float hue = 0;
+	private float hue = 0, minBrightness = 0;
 	private Matrix4f projectionMatrix;
 	
 	private TexturedShader entityShader = new TexturedShader();
@@ -42,6 +43,7 @@ public class MasterRenderer {
 		createProjectionMatrix();
 		entityRenderer = new EntityRenderer(entityShader, projectionMatrix);
 		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
+		Window.addExecuteListener(this);
 	}
 	
 	public static void enableCulling() {
@@ -54,15 +56,12 @@ public class MasterRenderer {
 	}
 	
 	public void render(Light light, Camera camera) {
-		float brightnessFactor = 1 - (float) (Window.time % 30000) / 15000.0f;
-		float minBrightness = 0.6f * (brightnessFactor * brightnessFactor) + 0.1f;
-		minBrightness = 0.7f;
-		prepare(minBrightness);
+		prepare();
 		
 		entityShader.enable();
 		entityShader.setLight(light);
 		entityShader.setViewPosition(camera.createViewMatrix());
-		entityShader.setSkyColor(SKYCOLOR);
+		entityShader.setSkyColor(skyColor);
 		entityShader.setMinBrightness(minBrightness);
 		entityRenderer.render(entities);
 		entityShader.disable();
@@ -70,7 +69,7 @@ public class MasterRenderer {
 		terrainShader.enable();
 		terrainShader.setLight(light);
 		terrainShader.setViewPosition(camera.createViewMatrix());
-		terrainShader.setSkyColor(SKYCOLOR);
+		terrainShader.setSkyColor(skyColor);
 		terrainShader.setMinBrightness(minBrightness);
 		terrainRenderer.render(terrains);
 		terrainShader.disable();
@@ -106,11 +105,11 @@ public class MasterRenderer {
 		list.add(entity);
 	}
 	
-	public void prepare(float brightness) {
+	public void prepare() {
 		hue += 0.01f;
 		if(hue > 1) hue = 0;
-		SKYCOLOR = Color.getHSBColor(0.5f, 1, brightness);
-		GL11.glClearColor(SKYCOLOR.getRed() / 255f, SKYCOLOR.getGreen() / 255f, SKYCOLOR.getBlue() / 255f, SKYCOLOR.getAlpha() / 255f);
+		skyColor = Color.getHSBColor(0.5f, 1, minBrightness);
+		GL11.glClearColor(skyColor.getRed() / 255f, skyColor.getGreen() / 255f, skyColor.getBlue() / 255f, skyColor.getAlpha() / 255f);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 	}
@@ -130,6 +129,14 @@ public class MasterRenderer {
 	public void remove() {
 		entityShader.remove();
 		terrainShader.remove();
+	}
+
+	@Override
+	public boolean execute(long time) {
+		float brightnessFactor = 1 - (float) (time % 30000) / 15000.0f;
+		minBrightness = 0.6f * (brightnessFactor * brightnessFactor) + 0.1f;
+		minBrightness = 0.7f;
+		return ExecuteInterface.REPEAT_EXECUTE;
 	}
 
 }

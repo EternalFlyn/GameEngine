@@ -45,11 +45,11 @@ public class TerrainShader extends ShaderProgram {
 	}
 	
 	public void setGrassColor(Color color) {
-		setUniform3f("grassColor", Vector3f.colorVector(color));
+		setUniform3f("grassColor", new Vector3f(color));
 	}
 	
 	public void setSkyColor(Color color) {
-		setUniform3f("skyColor", Vector3f.colorVector(color));
+		setUniform3f("skyColor", new Vector3f(color));
 	}
 	
 	public void setMinBrightness(float level) {

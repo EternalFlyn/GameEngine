@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.lwjgl.glfw.GLFWVidMode;
@@ -19,6 +20,8 @@ import com.flyn.game_engine.entity.Player;
 import com.flyn.game_engine.entity.Poppy;
 import com.flyn.game_engine.entity.Stall;
 import com.flyn.game_engine.entity.Torch;
+import com.flyn.game_engine.gui.GuiRenderer;
+import com.flyn.game_engine.gui.GuiTexture;
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.render.MasterRenderer;
 import com.flyn.game_engine.render.RawModel;
@@ -32,10 +35,9 @@ import com.flyn.game_engine.window.input.MouseMotionInput;
 import com.flyn.game_engine.window.input.WheelInput;
 
 public class Window {
-	
-	public static long time = 0;
-	
-	private static long currentFrameTime = 0, lastFrameTime = 0;
+
+	private static long currentFrameTime = 0, lastFrameTime = 0, time = 0;
+	private static ArrayList<ExecuteInterface> executes = new ArrayList<>();
 	
 	private int width = 0, height = 0;
 	private long window, startedTime = 0;
@@ -78,7 +80,7 @@ public class Window {
 		
 		startedTime = System.currentTimeMillis();
 		MasterRenderer renderer = new MasterRenderer(width, height);
-		Light light = new Light(new Vector3f(0, 1, 0), new Vector3f(1, 1, 1));
+		GuiRenderer gui = new GuiRenderer(window);
 		
 		Terrain terrain = new Terrain(0, -1);
 //		Terrain terrain2 = new Terrain(-1, -1);
@@ -89,14 +91,19 @@ public class Window {
 		texture.setReflectivity(0.3f);
 		Painting entity = new Painting(texture, new Vector3f(0, 0.5f, -1), new Vector3f(), new Vector3f(1, 1, 1));
 		
+		ArrayList<GuiTexture> guis = new ArrayList<>();
+		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/64695689_p0.jpg"), 550, 0, 250, 250));
+		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/icon_navigation_bar.png"), 0, 0, 75, 75));
+		
 		Stall stall = new Stall(new Vector3f(7, 0, -10), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1));
 		Dragon dragon = new Dragon(new Vector3f(-7, 0, -15), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
 		
 		Texture girlTexture = new Texture(Loader.loadColorTexture(Color.white));
 		RawModel girlModel = FileUtils.loadObjFile("src/main/java/model/girl.obj");
-		Entity girl = new Entity(girlModel, girlTexture, new Vector3f(-7, 0, -10), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
-		Player player = new Player(girlModel, girlTexture, new Vector3f(0, 0, -1), new Vector3f(-90, 180, 0), new Vector3f(0.1f, 0.1f, 0.1f));
+		Entity girl = new Entity(girlModel, girlTexture, new Vector3f(-1, 0, -1), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
+		Player player = new Player(girlModel, girlTexture, new Vector3f(0, 0, 0), new Vector3f(-90, 180, 0), new Vector3f(0.1f, 0.1f, 0.1f));
 		Camera camera = new Camera(player);
+		Light light = new Light(new Vector3f(0, 1, 0), new Vector3f(1, 1, 1));
 		
 		Poppy[] poppys = new Poppy[100];
 		for(int i = 0; i < poppys.length; i++) {
@@ -117,6 +124,9 @@ public class Window {
 			lastFrameTime = currentFrameTime;
 			currentFrameTime = System.currentTimeMillis();
 			glfwPollEvents();
+			for(int i = 0; i < executes.size(); i++) {
+				if(executes.get(i).execute(time)) executes.remove(i);
+			}
 			player.move(terrain);
 			camera.move();
 			renderer.addEntity(player);
@@ -125,25 +135,28 @@ public class Window {
 			renderer.addEntity(stall);
 			renderer.addEntity(entity);
 			for(Entity poppy : poppys) renderer.addEntity(poppy);
-			for(Entity torch : torchs) {
-				torch.setTextureIndex((int) (time / 250) % 7);
-				renderer.addEntity(torch);
-			}
+			for(Entity torch : torchs) renderer.addEntity(torch);
 			renderer.addTerrain(terrain);
 //			renderer.addTerrain(terrain2);
 			renderer.render(light, camera);
+			gui.render(guis);
 			glfwSwapBuffers(window);
 			girl.rotate(0, 1, 0);
 //			System.out.println("FPS:" + 1 / getFrameTimeSeconds());
 		}
 		
 		renderer.remove();
+		gui.remove();
 		Loader.clean();
 		glfwTerminate();
 	}
 	
 	public static float getFrameTimeSeconds() {
 		return (currentFrameTime - lastFrameTime) / 1000f;
+	}
+	
+	public static void addExecuteListener(ExecuteInterface execute) {
+		executes.add(execute);
 	}
 	
 }

@@ -18,11 +18,10 @@ public class Vector3f {
 		this.z = z;
 	}
 	
-	public static Vector3f colorVector(Color color) {
-		float r = color.getRed() / 255f;
-		float g = color.getGreen() / 255f;
-		float b = color.getBlue() / 255f;
-		return new Vector3f(r, g, b);
+	public Vector3f(Color color) {
+		x = color.getRed() / 255f;
+		y = color.getGreen() / 255f;
+		z = color.getBlue() / 255f;
 	}
 	
 	public Vector3f normalise() {

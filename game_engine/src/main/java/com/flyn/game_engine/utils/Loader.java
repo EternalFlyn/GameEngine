@@ -25,6 +25,13 @@ public class Loader {
 		return new RawModel(vaoID, indicesID, indices.length);
 	}
 	
+	public static RawModel loadToVAO(float[] vertices) {
+		int vaoID = createVAO();
+		storeAttribute(0, 2, vertices);
+		unbindVAO();
+		return new RawModel(vaoID, 0, vertices.length);
+	}
+	
 	public static int loadTexture(String ImagePath) {
 		int[][] img = FileUtils.loadImage(ImagePath);
 		int result = GL11.glGenTextures();

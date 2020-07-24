@@ -11,7 +11,7 @@ import com.flyn.game_engine.window.input.KeyInput;
 
 public class Player extends Entity {
 	
-	private static final float WALK_SPEED = 20, TURN_SPEED = 160, JUMP_POWER = 20, GRAVITY = -50;
+	private static final float WALK_SPEED = 5, TURN_SPEED = 180, JUMP_POWER = 3, GRAVITY = -10;
 	
 	private float currentSpeed = 0, currentTurnSpeed = 0, ySpeed = 0;
 	private boolean isJump = false;
@@ -27,11 +27,11 @@ public class Player extends Entity {
 		float distance = currentSpeed * frameTime, pitch = (float) Math.toRadians(getRotation().y);
 		ySpeed += GRAVITY * frameTime;
 		move(distance * (float) Math.sin(pitch), ySpeed * frameTime, distance * (float) Math.cos(pitch));
-		float terrainHeight = terrain.getHeight(getPosition().x * getScale().x, getPosition().z * getScale().z);
-		if(getPosition().y < terrainHeight * 10){
+		float terrainHeight = terrain.getHeight(getPosition().x, getPosition().z);
+		if(getPosition().y < terrainHeight){
 			ySpeed = 0;
 			isJump = false;
-			setPosition(new Vector3f(getPosition().x, terrainHeight * 10, getPosition().z));
+			setPosition(new Vector3f(getPosition().x, terrainHeight, getPosition().z));
 		}
 	}
 	

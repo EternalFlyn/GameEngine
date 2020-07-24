@@ -50,7 +50,7 @@ public class TexturedShader extends ShaderProgram {
 	}
 	
 	public void setSkyColor(Color color) {
-		setUniform3f("skyColor", Vector3f.colorVector(color));
+		setUniform3f("skyColor", new Vector3f(color));
 	}
 	
 	public void setTextureAmount(int col, int row) {
