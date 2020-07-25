@@ -13,19 +13,16 @@ import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.shader.TerrainShader;
 import com.flyn.game_engine.shader.TexturedShader;
 import com.flyn.game_engine.terrain.Terrain;
-import com.flyn.game_engine.window.ExecuteInterface;
-import com.flyn.game_engine.window.Window;
 
-public class MasterRenderer implements ExecuteInterface {
+public class MasterRenderer {
 	
 	public static final float FOV = 70;
 	public static final float NEAR_PLANE = 0.1f, FAR_PLANE = 1000;
 	
-	private static Color skyColor = Color.white;
+	private static Color skyColor = Color.cyan;
 	
 	private final float aspectRatio;
 	
-	private float hue = 0, minBrightness = 0;
 	private Matrix4f projectionMatrix;
 	
 	private TexturedShader entityShader = new TexturedShader();
@@ -43,7 +40,6 @@ public class MasterRenderer implements ExecuteInterface {
 		createProjectionMatrix();
 		entityRenderer = new EntityRenderer(entityShader, projectionMatrix);
 		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
-		Window.addExecuteListener(this);
 	}
 	
 	public static void enableCulling() {
@@ -55,22 +51,20 @@ public class MasterRenderer implements ExecuteInterface {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
 	
-	public void render(Light light, Camera camera) {
+	public void render(ArrayList<Light> lights, Camera camera) {
 		prepare();
 		
 		entityShader.enable();
-		entityShader.setLight(light);
+		entityShader.setLight(lights);
 		entityShader.setViewPosition(camera.createViewMatrix());
 		entityShader.setSkyColor(skyColor);
-		entityShader.setMinBrightness(minBrightness);
 		entityRenderer.render(entities);
 		entityShader.disable();
 		
 		terrainShader.enable();
-		terrainShader.setLight(light);
+		terrainShader.setLight(lights);
 		terrainShader.setViewPosition(camera.createViewMatrix());
 		terrainShader.setSkyColor(skyColor);
-		terrainShader.setMinBrightness(minBrightness);
 		terrainRenderer.render(terrains);
 		terrainShader.disable();
 		
@@ -106,9 +100,6 @@ public class MasterRenderer implements ExecuteInterface {
 	}
 	
 	public void prepare() {
-		hue += 0.01f;
-		if(hue > 1) hue = 0;
-		skyColor = Color.getHSBColor(0.5f, 1, minBrightness);
 		GL11.glClearColor(skyColor.getRed() / 255f, skyColor.getGreen() / 255f, skyColor.getBlue() / 255f, skyColor.getAlpha() / 255f);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
@@ -129,14 +120,6 @@ public class MasterRenderer implements ExecuteInterface {
 	public void remove() {
 		entityShader.remove();
 		terrainShader.remove();
-	}
-
-	@Override
-	public boolean execute(long time) {
-		float brightnessFactor = 1 - (float) (time % 30000) / 15000.0f;
-		minBrightness = 0.6f * (brightnessFactor * brightnessFactor) + 0.1f;
-		minBrightness = 0.7f;
-		return ExecuteInterface.REPEAT_EXECUTE;
 	}
 
 }

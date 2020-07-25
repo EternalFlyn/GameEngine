@@ -1,19 +1,19 @@
 #version 450 core
 
-layout (location = 0) in vec4 position;
-layout (location = 1) in vec2 texturedCoords;
-layout (location = 2) in vec3 normal;
+in vec4 position;
+in vec2 texturedCoords;
+in vec3 normal;
 
-layout (location = 0) out vec2 coords;
-layout (location = 1) out vec3 surfaceNormal;
-layout (location = 2) out vec3 toLightVector;
-layout (location = 3) out vec3 toCameraVector;
-layout (location = 4) out float visibility;
+out vec2 coords;
+out vec3 surfaceNormal;
+out vec3 toLightVector[4];
+out vec3 toCameraVector;
+out float visibility;
 
 uniform mat4 transformation;
 uniform mat4 projection;
 uniform mat4 view;
-uniform vec3 lightPosition;
+uniform vec3 lightPosition[4];
 uniform float useFakeLight;
 uniform vec2 textureAmount;
 uniform vec2 textureOffset;
@@ -33,7 +33,7 @@ void main() {
 	}
 	
 	surfaceNormal = (transformation * vec4(actualNormal, 0)).xyz;
-	toLightVector = lightPosition - worldPosition.xyz;
+	for(int i = 0; i < 4; i++) toLightVector[i] = lightPosition[i] - worldPosition.xyz;
 	toCameraVector = (inverse(view) * vec4(0, 0, 0, 1)).xyz - worldPosition.xyz;
 	
 	float distance = length(positionToCamera.xyz);

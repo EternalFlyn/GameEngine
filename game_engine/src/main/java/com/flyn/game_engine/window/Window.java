@@ -15,7 +15,6 @@ import com.flyn.game_engine.entity.Camera;
 import com.flyn.game_engine.entity.Dragon;
 import com.flyn.game_engine.entity.Entity;
 import com.flyn.game_engine.entity.Light;
-import com.flyn.game_engine.entity.Painting;
 import com.flyn.game_engine.entity.Player;
 import com.flyn.game_engine.entity.Poppy;
 import com.flyn.game_engine.entity.Stall;
@@ -86,13 +85,15 @@ public class Window {
 //		Terrain terrain2 = new Terrain(-1, -1);
 //		terrain2.setGrassColor(new Color(153, 255, 77));
 		
-		Texture texture = new Texture(Loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"));
-		texture.setShineDamper(10);
-		texture.setReflectivity(0.3f);
-		Painting entity = new Painting(texture, new Vector3f(0, 0.5f, -1), new Vector3f(), new Vector3f(1, 1, 1));
+		ArrayList<Light> lights = new ArrayList<>();
+		lights.add(new Light(new Vector3f(0, 10000, 0), new Vector3f(1, 1, 1), new Vector3f(1, 0, 0)));
+		lights.add(new Light(new Vector3f(1, 1, 1), new Vector3f(Color.red), new Vector3f(1, 0.1f, 0.02f)));
+		lights.add(new Light(new Vector3f(1, 1, -1), new Vector3f(Color.green), new Vector3f(1, 0.1f, 0.02f)));
+		lights.add(new Light(new Vector3f(-1, 1, -1), new Vector3f(Color.blue), new Vector3f(1, 0.1f, 0.02f)));
 		
 		ArrayList<GuiTexture> guis = new ArrayList<>();
-		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/64695689_p0.jpg"), 550, 0, 250, 250));
+		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/64695689_p0.jpg"), 600, 0, 200, 200));
+		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"), 600, 200, 200, 150));
 		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/icon_navigation_bar.png"), 0, 0, 75, 75));
 		
 		Stall stall = new Stall(new Vector3f(7, 0, -10), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1));
@@ -103,7 +104,6 @@ public class Window {
 		Entity girl = new Entity(girlModel, girlTexture, new Vector3f(-1, 0, -1), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
 		Player player = new Player(girlModel, girlTexture, new Vector3f(0, 0, 0), new Vector3f(-90, 180, 0), new Vector3f(0.1f, 0.1f, 0.1f));
 		Camera camera = new Camera(player);
-		Light light = new Light(new Vector3f(0, 1, 0), new Vector3f(1, 1, 1));
 		
 		Poppy[] poppys = new Poppy[100];
 		for(int i = 0; i < poppys.length; i++) {
@@ -133,12 +133,11 @@ public class Window {
 			renderer.addEntity(dragon);
 			renderer.addEntity(girl);
 			renderer.addEntity(stall);
-			renderer.addEntity(entity);
 			for(Entity poppy : poppys) renderer.addEntity(poppy);
 			for(Entity torch : torchs) renderer.addEntity(torch);
 			renderer.addTerrain(terrain);
 //			renderer.addTerrain(terrain2);
-			renderer.render(light, camera);
+			renderer.render(lights, camera);
 			gui.render(guis);
 			glfwSwapBuffers(window);
 			girl.rotate(0, 1, 0);

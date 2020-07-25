@@ -24,10 +24,14 @@ public class Vector3f {
 		z = color.getBlue() / 255f;
 	}
 	
-	public Vector3f normalise() {
+	public float length() {
 		double dx = x, dy = y, dz = z;
-		float norm = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-		Vector3f result = new Vector3f(x / norm, y / norm, z / norm);
+		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
+	
+	public Vector3f normalise() {
+		float length = length();
+		Vector3f result = new Vector3f(x / length, y / length, z / length);
 		return result;
 	}
 }
