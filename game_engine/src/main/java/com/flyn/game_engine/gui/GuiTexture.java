@@ -23,7 +23,7 @@ public class GuiTexture {
 	}
 	
 	public Matrix4f getTransformationMatirx(long window) {
-		int[] width = new int[] {0}, height = new int[] {0};
+		int[] width = new int[1], height = new int[1];
 		GLFW.glfwGetWindowSize(window, width, height);
 		Matrix4f translate = Matrix4f.translate(new Vector3f(2 * x / (float) width[0], -2 * y / (float) height[0], 0));
 		Matrix4f scale = Matrix4f.zoom(w / (float) width[0], h / (float) height[0], 0);

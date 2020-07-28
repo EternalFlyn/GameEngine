@@ -12,6 +12,8 @@ import com.flyn.game_engine.entity.Light;
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.shader.TerrainShader;
 import com.flyn.game_engine.shader.TexturedShader;
+import com.flyn.game_engine.skybox.SkyboxRenderer;
+import com.flyn.game_engine.skybox.SkyboxShader;
 import com.flyn.game_engine.terrain.Terrain;
 
 public class MasterRenderer {
@@ -19,7 +21,7 @@ public class MasterRenderer {
 	public static final float FOV = 70;
 	public static final float NEAR_PLANE = 0.1f, FAR_PLANE = 1000;
 	
-	private static Color skyColor = Color.cyan;
+	private static Color skyColor = new Color(94, 134, 193); //Pale Denim
 	
 	private final float aspectRatio;
 	
@@ -31,6 +33,9 @@ public class MasterRenderer {
 	private TerrainShader terrainShader = new TerrainShader();
 	private TerrainRenderer terrainRenderer;
 	
+	private SkyboxShader skyboxShader = new SkyboxShader();
+	private SkyboxRenderer skyboxRenderer;
+	
 	private HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities = new HashMap<>();
 	private ArrayList<Terrain> terrains = new ArrayList<>();
 	
@@ -40,6 +45,7 @@ public class MasterRenderer {
 		createProjectionMatrix();
 		entityRenderer = new EntityRenderer(entityShader, projectionMatrix);
 		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
+		skyboxRenderer = new SkyboxRenderer(skyboxShader, projectionMatrix);
 	}
 	
 	public static void enableCulling() {
@@ -51,22 +57,35 @@ public class MasterRenderer {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
 	
-	public void render(ArrayList<Light> lights, Camera camera) {
+	public void render(long time, ArrayList<Light> lights, Camera camera) {
 		prepare();
+		Matrix4f view = camera.createViewMatrix();
 		
 		entityShader.enable();
+		entityShader.setViewPosition(view);
 		entityShader.setLight(lights);
-		entityShader.setViewPosition(camera.createViewMatrix());
 		entityShader.setSkyColor(skyColor);
 		entityRenderer.render(entities);
 		entityShader.disable();
 		
 		terrainShader.enable();
+		terrainShader.setViewPosition(view);
 		terrainShader.setLight(lights);
-		terrainShader.setViewPosition(camera.createViewMatrix());
 		terrainShader.setSkyColor(skyColor);
 		terrainRenderer.render(terrains);
 		terrainShader.disable();
+		
+		skyboxShader.enable();
+		Matrix4f followView = view.clone();
+		followView.elements[0 + 3 * 4] = 0;
+		followView.elements[1 + 3 * 4] = 0;
+		followView.elements[2 + 3 * 4] = 0;
+		Matrix4f skyRotate = Matrix4f.pitch((float) time / 1000.0f);
+		skyboxShader.setViewPosition(skyRotate.multiply(followView));
+		skyboxShader.setSkyColor(skyColor);
+		skyboxShader.setBlendFactor(dayNightSystem(time));
+		skyboxRenderer.render();
+		skyboxShader.disable();
 		
 		terrains.clear();
 		entities.clear();
@@ -105,6 +124,15 @@ public class MasterRenderer {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 	}
 	
+	private float dayNightSystem(long time) {
+		//0 day texture, 1 night texture
+		float hour = (int) (time % 24000);
+		if(hour > 7000 && hour <= 17000) return 0;
+		else if(hour > 5000 && hour <= 7000) return 1 - (hour - 5000) / 2000;
+		else if(hour > 17000 && hour <= 19000) return (hour - 17000) / 2000;
+		else return 1;
+	}
+	
 	private void createProjectionMatrix() {
 		float yScale = (float) (1f / Math.tan(Math.toRadians(FOV / 2f))), xScale = yScale / aspectRatio;
 		float frustumLength = FAR_PLANE - NEAR_PLANE; //zm
@@ -117,9 +145,14 @@ public class MasterRenderer {
 		projectionMatrix.elements[3 + 2 * 4] = -1;
 	}
 	
+	public Matrix4f getProjectionMatrix() {
+		return projectionMatrix;
+	}
+	
 	public void remove() {
 		entityShader.remove();
 		terrainShader.remove();
+		skyboxShader.remove();
 	}
 
 }

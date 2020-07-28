@@ -139,9 +139,9 @@ public class Matrix4f {
 		
 		for(int y = 0; y < 4; y++) {
 			for(int x = 0; x < 4; x++) {
-				float sum = 0.0f;
+				float sum = 0;
 				for(int a = 0; a < 4; a++) {
-					sum += elements[a + y *4] * matrix.elements[x + a * 4];
+					sum += elements[a + y * 4] * matrix.elements[x + a * 4];
 				}
 				result.elements[x + y * 4] = sum;
 			}
@@ -150,8 +150,82 @@ public class Matrix4f {
 		return result;
 	}
 	
+	public double getDet() {
+		double[] m = new double[16];
+		for(int i = 0; i < 16; i++) m[i] = elements[i];
+		return determinant(m, 3);
+	}
+	
+	private double determinant(double[] matrix, int size) {
+		if(size == 0) return matrix[0];
+		if(matrix[0] == 0) {
+			for(int i = 1; i <= size; i++) {
+				if(i == size) return 0;
+				if(matrix[i] == 0) continue;
+				for(int j = 0; j < size + 1; j++) {
+					double temp = matrix[0 + j * (size + 1)];
+					matrix[0 + j * (size + 1)] = matrix[i + j * (size + 1)];
+					matrix[i + j * (size + 1)] = -temp;
+				}
+				break;
+			}
+		}
+		double[] m = new double[size * size];
+		for(int r = 0; r < size; r++) {
+			for(int c = 0; c < size; c++) {
+				m[r + c * size] = matrix[(r + 1) + (c + 1) * (size + 1)];
+				if(matrix[r] != 0) m[r + c * size] -= matrix[r + 1] / matrix[0] * matrix[(c + 1) * (size + 1)];
+			}
+		}
+		return matrix[0] * determinant(m, size - 1);
+	}
+	
+	private double[] minor(double[] matrix, int size, int row, int col) {
+		double[] minor = new double[size * size];
+		for(int i = 0; i < size; i++) {
+			for(int j = 0; j < size; j++) {
+				minor[i + j * size] = matrix[(i < row ? i : i + 1) + (j < col ? j : j + 1) * (size + 1)];
+			}
+		}
+		return minor;
+	}
+	
+	public Matrix4f inverse() {
+		double det = getDet();
+		if(det == 0) return null;
+		Matrix4f result = new Matrix4f();
+		double[] m = new double[16];
+		for(int i = 0; i < 16; i++) m[i] = elements[i];
+		for(int i = 0; i < 4; i++) {
+			for(int j = 0; j < 4; j++) {
+				int sgn = (i + j) % 2 == 0 ? 1 : -1;
+				result.elements[i + j * 4] = (float) (sgn * determinant(minor(m, 3, j, i), 2) / det);
+			}
+		}
+		return result;
+	}
+	
 	public FloatBuffer toFloatBuffer() {
 		return BufferUtils.createFloatBuffer(elements);
+	}
+	
+	public Matrix4f clone() {
+		Matrix4f result = new Matrix4f();
+		result.elements = this.elements.clone();
+		return result;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("");
+		for(int i = 0; i < 4; i++) {
+			for(int j = 0; j < 4; j++) {
+				sb.append(elements[i + j * 4]);
+				if(j != 3) sb.append(" ");
+			}
+			if(i != 3) sb.append("\n");
+		}
+		return sb.toString();
 	}
 
 }

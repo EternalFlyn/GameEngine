@@ -18,7 +18,7 @@ uniform float useFakeLight;
 uniform vec2 textureAmount;
 uniform vec2 textureOffset;
 
-const float fogDensity = 0.01;
+const float fogDensity = 0.03;
 const float forGradient = 1.5;
 
 void main() {

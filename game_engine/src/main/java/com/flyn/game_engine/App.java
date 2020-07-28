@@ -2,10 +2,12 @@ package com.flyn.game_engine;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.SimplexNoise2D;
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.window.Window;
@@ -16,9 +18,32 @@ public class App {
 
 	public static void main(String[] args) {
 		new Thread(() -> {
-			window.setWindow("Test", 800, 600);
+			window.setWindow("Test", 1280, 720);
 			window.showWindow();
 		}).start();
+		
+//		Matrix4f m = new Matrix4f();
+//		m.elements[0] = 0.8033333f;
+//		m.elements[5] = 1.428148f;
+//		m.elements[10] = -1.0001999f;
+//		m.elements[11] = -1.0f;
+//		m.elements[14] = -0.20002f;
+//		System.out.println(m);
+//		System.out.println(m.getDet());	
+		
+//		long t1 = 0;
+//		Random r = new Random();
+//		int times = 1000000;
+//		for(int i = 0; i < times; i++) {
+//			Matrix4f m = new Matrix4f();
+//			for(int j = 0; j < m.elements.length; j++) m.elements[j] = r.nextFloat();
+//			long t = System.nanoTime();
+//			m.inverse();
+//			t1 += System.nanoTime() - t;
+//		}
+//		System.out.println((float) (t1) / 1000000000);
+//		System.out.println(t1 / times);
+		
 //		float x = 0.001f, y = 1.000f;
 //		Vector3f p1 = new Vector3f(0, 100000, 0);
 //		Vector3f p2 = new Vector3f(1, -0, 0);

@@ -25,7 +25,7 @@ public class GuiRenderer {
 				2, -2,
 				2, 0
 		};
-		quad = Loader.loadToVAO(vertices);
+		quad = Loader.loadToVAO(vertices, 2);
 	}
 	
 	public void render(ArrayList<GuiTexture> guis) {

@@ -53,7 +53,7 @@ public class Window {
 	public void setWindow(String title, int width, int height) {
 		this.width = width;
 		this.height = height;
-		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); //設定視窗不可調整大小
+//		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); //設定視窗不可調整大小
 		window = glfwCreateWindow(width, height, title, NULL, NULL); //創建視窗
 		
 		if(window == NULL) {
@@ -81,6 +81,8 @@ public class Window {
 		MasterRenderer renderer = new MasterRenderer(width, height);
 		GuiRenderer gui = new GuiRenderer(window);
 		
+		MousePicker picker = new MousePicker(window, renderer.getProjectionMatrix());
+		
 		Terrain terrain = new Terrain(0, -1);
 //		Terrain terrain2 = new Terrain(-1, -1);
 //		terrain2.setGrassColor(new Color(153, 255, 77));
@@ -92,8 +94,8 @@ public class Window {
 		lights.add(new Light(new Vector3f(-1, 1, -1), new Vector3f(Color.blue), new Vector3f(1, 0.1f, 0.02f)));
 		
 		ArrayList<GuiTexture> guis = new ArrayList<>();
-		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/64695689_p0.jpg"), 600, 0, 200, 200));
-		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"), 600, 200, 200, 150));
+		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/64695689_p0.jpg"), width - 200, 0, 200, 200));
+		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"), width - 200, 200, 200, 150));
 		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/icon_navigation_bar.png"), 0, 0, 75, 75));
 		
 		Stall stall = new Stall(new Vector3f(7, 0, -10), new Vector3f(0, 180, 0), new Vector3f(1, 1, 1));
@@ -129,6 +131,7 @@ public class Window {
 			}
 			player.move(terrain);
 			camera.move();
+			System.out.println(picker.getCurrentRay(camera.createViewMatrix()));
 			renderer.addEntity(player);
 			renderer.addEntity(dragon);
 			renderer.addEntity(girl);
@@ -137,7 +140,7 @@ public class Window {
 			for(Entity torch : torchs) renderer.addEntity(torch);
 			renderer.addTerrain(terrain);
 //			renderer.addTerrain(terrain2);
-			renderer.render(lights, camera);
+			renderer.render(time, lights, camera);
 			gui.render(guis);
 			glfwSwapBuffers(window);
 			girl.rotate(0, 1, 0);

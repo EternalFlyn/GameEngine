@@ -1,8 +1,8 @@
 #version 450 core
 
-layout (location = 0) in vec2 position;
+in vec2 position;
 
-layout (location = 0) out vec2 coords;
+out vec2 coords;
 
 uniform mat4 transformation;
 

@@ -34,4 +34,15 @@ public class Vector3f {
 		Vector3f result = new Vector3f(x / length, y / length, z / length);
 		return result;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("");
+		sb.append(x);
+		sb.append(", ");
+		sb.append(y);
+		sb.append(", ");
+		sb.append(z);
+		return sb.toString();
+	}
 }

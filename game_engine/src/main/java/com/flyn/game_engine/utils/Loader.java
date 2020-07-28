@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
@@ -25,15 +26,15 @@ public class Loader {
 		return new RawModel(vaoID, indicesID, indices.length);
 	}
 	
-	public static RawModel loadToVAO(float[] vertices) {
+	public static RawModel loadToVAO(float[] vertices, int dimension) {
 		int vaoID = createVAO();
-		storeAttribute(0, 2, vertices);
+		storeAttribute(0, dimension, vertices);
 		unbindVAO();
-		return new RawModel(vaoID, 0, vertices.length);
+		return new RawModel(vaoID, 0, vertices.length / dimension);
 	}
 	
-	public static int loadTexture(String ImagePath) {
-		int[][] img = FileUtils.loadImage(ImagePath);
+	public static int loadTexture(String imagePath) {
+		int[][] img = FileUtils.loadImage(imagePath);
 		int result = GL11.glGenTextures();
 		textures.add(result);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, result);
@@ -61,6 +62,20 @@ public class Loader {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, 1, 1, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(data));
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		return result;
+	}
+	
+	public static int loadCubeMap(String[] imagePaths) {
+		int result = GL11.glGenTextures();
+		textures.add(result);
+		GL13.glActiveTexture(GL13.GL_TEXTURE0);
+		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, result);
+		for(int i = 0; i < imagePaths.length; i++) {
+			int[][] img = FileUtils.loadImage(imagePaths[i]);
+			GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL11.GL_RGBA, img[0][0], img[0][1], 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, BufferUtils.createIntBuffer(img[1]));
+		}
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		return result;
 	}
 	
