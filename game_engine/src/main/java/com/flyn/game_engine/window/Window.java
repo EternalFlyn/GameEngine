@@ -21,6 +21,7 @@ import com.flyn.game_engine.entity.Stall;
 import com.flyn.game_engine.entity.Torch;
 import com.flyn.game_engine.gui.GuiRenderer;
 import com.flyn.game_engine.gui.GuiTexture;
+import com.flyn.game_engine.math.Octree;
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.render.MasterRenderer;
 import com.flyn.game_engine.render.RawModel;
@@ -120,6 +121,10 @@ public class Window {
 			float x = ran.nextFloat() * 20 - 10, z = ran.nextFloat() * 20 - 10;
 			torchs[i] = new Torch(new Vector3f(x, terrain.getHeight(x, z), z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
 		}
+		
+		long tt = System.nanoTime();
+		Octree o = FileUtils.test("src/main/java/model/dragon.obj");
+		System.out.println(System.nanoTime() - tt);
 
 		while(!glfwWindowShouldClose(window)) {
 			time = System.currentTimeMillis() - startedTime;
@@ -131,7 +136,7 @@ public class Window {
 			}
 			player.move(terrain);
 			camera.move();
-			System.out.println(picker.getCurrentRay(camera.createViewMatrix()));
+//			System.out.println(picker.getCurrentRay(camera.createViewMatrix()));
 			renderer.addEntity(player);
 			renderer.addEntity(dragon);
 			renderer.addEntity(girl);
@@ -139,6 +144,7 @@ public class Window {
 			for(Entity poppy : poppys) renderer.addEntity(poppy);
 			for(Entity torch : torchs) renderer.addEntity(torch);
 			renderer.addTerrain(terrain);
+			renderer.addOctree(o);
 //			renderer.addTerrain(terrain2);
 			renderer.render(time, lights, camera);
 			gui.render(guis);

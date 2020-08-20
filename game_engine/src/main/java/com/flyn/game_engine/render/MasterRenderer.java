@@ -10,6 +10,9 @@ import com.flyn.game_engine.entity.Camera;
 import com.flyn.game_engine.entity.Entity;
 import com.flyn.game_engine.entity.Light;
 import com.flyn.game_engine.math.Matrix4f;
+import com.flyn.game_engine.math.Octree;
+import com.flyn.game_engine.math.OctreeRenderer;
+import com.flyn.game_engine.math.OctreeShader;
 import com.flyn.game_engine.shader.TerrainShader;
 import com.flyn.game_engine.shader.TexturedShader;
 import com.flyn.game_engine.skybox.SkyboxRenderer;
@@ -36,8 +39,12 @@ public class MasterRenderer {
 	private SkyboxShader skyboxShader = new SkyboxShader();
 	private SkyboxRenderer skyboxRenderer;
 	
+	private OctreeShader octreeShader = new OctreeShader();
+	private OctreeRenderer octreeRenderer;
+	
 	private HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities = new HashMap<>();
 	private ArrayList<Terrain> terrains = new ArrayList<>();
+	private ArrayList<Octree> tree = new ArrayList<>();
 	
 	public MasterRenderer(int width, int height) {
 		enableCulling();
@@ -46,6 +53,7 @@ public class MasterRenderer {
 		entityRenderer = new EntityRenderer(entityShader, projectionMatrix);
 		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
 		skyboxRenderer = new SkyboxRenderer(skyboxShader, projectionMatrix);
+		octreeRenderer = new OctreeRenderer(octreeShader, projectionMatrix);
 	}
 	
 	public static void enableCulling() {
@@ -87,8 +95,18 @@ public class MasterRenderer {
 		skyboxRenderer.render();
 		skyboxShader.disable();
 		
+		octreeShader.enable();
+		octreeShader.setViewPosition(view);
+		octreeRenderer.render(tree);
+		octreeShader.disable();
+		
+		tree.clear();
 		terrains.clear();
 		entities.clear();
+	}
+	
+	public void addOctree(Octree octree) {
+		tree.add(octree);
 	}
 	
 	public void addTerrain(Terrain terrain) {
@@ -153,6 +171,7 @@ public class MasterRenderer {
 		entityShader.remove();
 		terrainShader.remove();
 		skyboxShader.remove();
+		octreeShader.remove();
 	}
 
 }

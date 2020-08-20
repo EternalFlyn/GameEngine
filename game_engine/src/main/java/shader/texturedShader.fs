@@ -34,6 +34,11 @@ void main(void) {
 		
 		float attenuationFactor = attenuation[i].x + attenuation[i].y * lightDistance + attenuation[i].z * lightDistance * lightDistance;
 		float brightness = max(dot(unitNormal, unitLightVector), 0);
+		
+		//cel shading
+		//float level = floor(brightness  * 3);
+		//brightness = level / 3;
+		
 		vec3 reflectedLightDirection = reflect(-unitLightVector, unitNormal);
 		float specularFactor = max(dot(unitCameraVector, reflectedLightDirection), 0);
 		float dampedFactor = pow(specularFactor, shineDamper);

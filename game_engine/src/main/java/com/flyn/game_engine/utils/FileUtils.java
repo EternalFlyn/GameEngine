@@ -12,6 +12,7 @@ import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
+import com.flyn.game_engine.math.Octree;
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.render.RawModel;
 
@@ -122,6 +123,67 @@ public class FileUtils {
 		RawModel model = Loader.loadToVAO(indices, vertices, textures, normals);
 		models.put(filePath, model);
 		return model;
+	}
+	
+	public static Octree test(String filePath) {
+		HashSet<Integer> NumberList = new HashSet<>();
+		ArrayList<Float> verticesArray = new ArrayList<>();
+		ArrayList<Vector3f> texturesArray = new ArrayList<>(), normalsArray = new ArrayList<>();
+		ArrayList<Integer> indeicsArray = new ArrayList<>();
+		float[] vertices = null, textures = null, normals = null;
+		int[] indices = null;
+		boolean inFaceData = false;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(filePath));
+			String buffer;
+			while((buffer = reader.readLine()) != null) {
+				String[] data = buffer.replaceAll("  ", " ").split(" ");
+				switch(data[0]) {
+				case "v":
+					verticesArray.add(Float.parseFloat(data[1]));
+					verticesArray.add(Float.parseFloat(data[2]));
+					verticesArray.add(Float.parseFloat(data[3]));
+					break;
+				case "vt":
+					texturesArray.add(new Vector3f(Float.parseFloat(data[1]), Float.parseFloat(data[2]), 0));
+					break;
+				case "vn":
+					normalsArray.add(new Vector3f(Float.parseFloat(data[1]), Float.parseFloat(data[2]), Float.parseFloat(data[3])));
+					break;
+				case "f":
+					if(!inFaceData) {
+						inFaceData = true;
+						int length = verticesArray.size();
+						vertices = new float[length];
+						textures = new float[(int) (2.0f / 3.0f * length)];
+						normals = new float[length];
+					}
+					for(int i = 0; i < 3; i++) {
+						String[] faceData = data[i + 1].split("/");
+						int vertexNumber = Integer.parseInt(faceData[0]) - 1;
+						indeicsArray.add(vertexNumber);
+						if(!NumberList.contains(vertexNumber)) {
+							NumberList.add(vertexNumber);
+							Vector3f textureVector = texturesArray.get(Integer.parseInt(faceData[1]) - 1);
+							textures[vertexNumber * 2] = textureVector.x;
+							textures[vertexNumber * 2 + 1] = 1 - textureVector.y;
+							Vector3f normalVector = normalsArray.get(Integer.parseInt(faceData[2]) - 1);
+							normals[vertexNumber * 3] = normalVector.x;
+							normals[vertexNumber * 3 + 1] = normalVector.y;
+							normals[vertexNumber * 3 + 2] = normalVector.z;
+						}
+					}
+				}
+			}
+			reader.close();
+			Iterator<Float> iter = verticesArray.iterator();
+			for(int i = 0; i < vertices.length; i++) vertices[i] = iter.next();
+			indices = indeicsArray.stream().mapToInt(i -> i).toArray();
+		} catch (NumberFormatException | IOException e) {
+			System.err.println("Couldn't find the file : " + filePath);
+			e.printStackTrace();
+		}
+		return new Octree(vertices.length / 3, vertices);
 	}
 
 }
