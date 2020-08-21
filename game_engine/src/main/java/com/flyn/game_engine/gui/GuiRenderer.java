@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import com.flyn.game_engine.render.RawModel;
+import com.flyn.game_engine.basic.RawModel;
 import com.flyn.game_engine.utils.Loader;
 
 public class GuiRenderer {

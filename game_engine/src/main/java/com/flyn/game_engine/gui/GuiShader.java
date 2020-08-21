@@ -1,7 +1,7 @@
 package com.flyn.game_engine.gui;
 
+import com.flyn.game_engine.basic.ShaderProgram;
 import com.flyn.game_engine.math.Matrix4f;
-import com.flyn.game_engine.shader.ShaderProgram;
 
 public class GuiShader extends ShaderProgram {
 	

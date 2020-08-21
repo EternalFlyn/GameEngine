@@ -7,10 +7,10 @@ import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.flyn.game_engine.basic.Window;
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.SimplexNoise2D;
 import com.flyn.game_engine.math.Vector3f;
-import com.flyn.game_engine.window.Window;
 
 public class App {
 

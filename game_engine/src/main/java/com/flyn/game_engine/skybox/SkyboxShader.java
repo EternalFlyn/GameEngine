@@ -2,9 +2,9 @@ package com.flyn.game_engine.skybox;
 
 import java.awt.Color;
 
+import com.flyn.game_engine.basic.ShaderProgram;
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
-import com.flyn.game_engine.shader.ShaderProgram;
 
 public class SkyboxShader extends ShaderProgram {
 

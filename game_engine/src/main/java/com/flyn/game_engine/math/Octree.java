@@ -3,7 +3,7 @@ package com.flyn.game_engine.math;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.flyn.game_engine.entity.Box;
+import com.flyn.game_engine.entity.object.Box;
 
 public class Octree {
 

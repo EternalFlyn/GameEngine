@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import com.flyn.game_engine.entity.Box;
+import com.flyn.game_engine.entity.object.Box;
 
 public class OctreeRenderer {
 	

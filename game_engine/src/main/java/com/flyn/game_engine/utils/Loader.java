@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import com.flyn.game_engine.render.RawModel;
+import com.flyn.game_engine.basic.RawModel;
 
 public class Loader {
 	

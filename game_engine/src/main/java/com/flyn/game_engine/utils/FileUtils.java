@@ -12,9 +12,9 @@ import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
+import com.flyn.game_engine.basic.RawModel;
 import com.flyn.game_engine.math.Octree;
 import com.flyn.game_engine.math.Vector3f;
-import com.flyn.game_engine.render.RawModel;
 
 public class FileUtils {
 	

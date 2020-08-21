@@ -2,10 +2,10 @@ package com.flyn.game_engine.entity;
 
 import java.awt.Color;
 
+import com.flyn.game_engine.basic.RawModel;
+import com.flyn.game_engine.basic.Texture;
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
-import com.flyn.game_engine.render.RawModel;
-import com.flyn.game_engine.render.Texture;
 import com.flyn.game_engine.utils.Loader;
 
 public class Entity {
