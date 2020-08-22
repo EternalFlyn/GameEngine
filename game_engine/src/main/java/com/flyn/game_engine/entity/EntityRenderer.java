@@ -20,11 +20,8 @@ public class EntityRenderer {
 	
 	private EntityShader shader;
 	
-	public EntityRenderer(EntityShader shader, Matrix4f projectionMatrix) {
+	public EntityRenderer(EntityShader shader) {
 		this.shader = shader;
-		shader.enable();
-		shader.setProjection(projectionMatrix);
-		shader.disable();
 	}
 	
 	public void render(HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities) {

@@ -10,12 +10,6 @@ import com.flyn.game_engine.entity.object.Box;
 
 public class OctreeRenderer {
 	
-	public OctreeRenderer(OctreeShader shader, Matrix4f projectionMatrix) {
-		shader.enable();
-		shader.setProjection(projectionMatrix);
-		shader.disable();
-	}
-	
 	public void render(ArrayList<Octree> trees) {
 		for(Octree o : trees) {
 			for(Box b : o.getModel()) {

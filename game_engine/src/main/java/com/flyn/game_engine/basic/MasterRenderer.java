@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import com.flyn.game_engine.entity.Entity;
 import com.flyn.game_engine.entity.EntityRenderer;
 import com.flyn.game_engine.entity.EntityShader;
+import com.flyn.game_engine.input.WindowResizeInput;
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Octree;
 import com.flyn.game_engine.math.OctreeRenderer;
@@ -18,6 +19,9 @@ import com.flyn.game_engine.skybox.SkyboxShader;
 import com.flyn.game_engine.terrain.Terrain;
 import com.flyn.game_engine.terrain.TerrainRenderer;
 import com.flyn.game_engine.terrain.TerrainShader;
+import com.flyn.game_engine.water.WaterRenderer;
+import com.flyn.game_engine.water.WaterShader;
+import com.flyn.game_engine.water.WaterTile;
 
 public class MasterRenderer {
 	
@@ -26,7 +30,10 @@ public class MasterRenderer {
 	
 	private static Color skyColor = new Color(94, 134, 193); //Pale Denim
 	
-	private final float aspectRatio;
+	private final long window;
+	
+	private boolean isSizeChange;
+	private float aspectRatio = 0;
 	
 	private Matrix4f projectionMatrix;
 	
@@ -42,18 +49,23 @@ public class MasterRenderer {
 	private OctreeShader octreeShader = new OctreeShader();
 	private OctreeRenderer octreeRenderer;
 	
+	private WaterShader waterShader = new WaterShader();
+	private WaterRenderer waterRenderer;
+	
 	private HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities = new HashMap<>();
 	private ArrayList<Terrain> terrains = new ArrayList<>();
 	private ArrayList<Octree> tree = new ArrayList<>();
+	private ArrayList<WaterTile> waters = new ArrayList<>();
 	
-	public MasterRenderer(int width, int height) {
+	public MasterRenderer(long window) {
 		enableCulling();
-		aspectRatio = (float) width / (float) height;
-		createProjectionMatrix();
-		entityRenderer = new EntityRenderer(entityShader, projectionMatrix);
-		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
-		skyboxRenderer = new SkyboxRenderer(skyboxShader, projectionMatrix);
-		octreeRenderer = new OctreeRenderer(octreeShader, projectionMatrix);
+		this.window = window;
+		sizeCheck();
+		entityRenderer = new EntityRenderer(entityShader);
+		terrainRenderer = new TerrainRenderer(terrainShader);
+		skyboxRenderer = new SkyboxRenderer(skyboxShader);
+		octreeRenderer = new OctreeRenderer();
+		waterRenderer = new WaterRenderer(waterShader);
 	}
 	
 	public static void enableCulling() {
@@ -66,10 +78,12 @@ public class MasterRenderer {
 	}
 	
 	public void render(long time, ArrayList<Light> lights, Camera camera) {
+		sizeCheck();
 		prepare();
 		Matrix4f view = camera.createViewMatrix();
 		
 		entityShader.enable();
+		if(isSizeChange) entityShader.setProjection(projectionMatrix);
 		entityShader.setViewPosition(view);
 		entityShader.setLight(lights);
 		entityShader.setSkyColor(skyColor);
@@ -77,6 +91,7 @@ public class MasterRenderer {
 		entityShader.disable();
 		
 		terrainShader.enable();
+		if(isSizeChange) terrainShader.setProjection(projectionMatrix);
 		terrainShader.setViewPosition(view);
 		terrainShader.setLight(lights);
 		terrainShader.setSkyColor(skyColor);
@@ -84,25 +99,34 @@ public class MasterRenderer {
 		terrainShader.disable();
 		
 		skyboxShader.enable();
-		Matrix4f followView = view.clone();
-		followView.elements[0 + 3 * 4] = 0;
-		followView.elements[1 + 3 * 4] = 0;
-		followView.elements[2 + 3 * 4] = 0;
+		if(isSizeChange) skyboxShader.setProjection(projectionMatrix);
+		Matrix4f followView = new Matrix4f();
+		followView.fill(view);
+		followView.elements[0][3] = 0;
+		followView.elements[1][3] = 0;
+		followView.elements[2][3] = 0;
 		Matrix4f skyRotate = Matrix4f.pitch((float) time / 1000.0f);
-		skyboxShader.setViewPosition(skyRotate.multiply(followView));
+		skyboxShader.setViewPosition((Matrix4f) followView.multiply(skyRotate));
 		skyboxShader.setSkyColor(skyColor);
 		skyboxShader.setBlendFactor(dayNightSystem(time));
 		skyboxRenderer.render();
 		skyboxShader.disable();
 		
 		octreeShader.enable();
+		if(isSizeChange) octreeShader.setProjection(projectionMatrix);
 		octreeShader.setViewPosition(view);
 		octreeRenderer.render(tree);
 		octreeShader.disable();
 		
-		tree.clear();
-		terrains.clear();
-		entities.clear();
+		waterShader.enable();
+		if(isSizeChange) waterShader.setProjection(projectionMatrix);
+		waterShader.setViewPosition(view);
+		waterRenderer.render(waters);
+		waterShader.disable();
+	}
+	
+	public void addWater(WaterTile water) {
+		waters.add(water);
 	}
 	
 	public void addOctree(Octree octree) {
@@ -150,21 +174,20 @@ public class MasterRenderer {
 		else if(hour > 17000 && hour <= 19000) return (hour - 17000) / 2000;
 		else return 1;
 	}
-	
-	private void createProjectionMatrix() {
-		float yScale = (float) (1f / Math.tan(Math.toRadians(FOV / 2f))), xScale = yScale / aspectRatio;
-		float frustumLength = FAR_PLANE - NEAR_PLANE; //zm
-		
-		projectionMatrix = new Matrix4f();
-		projectionMatrix.elements[0 + 0 * 4] = xScale;
-		projectionMatrix.elements[1 + 1 * 4] = yScale;
-		projectionMatrix.elements[2 + 2 * 4] = -(FAR_PLANE + NEAR_PLANE) / frustumLength;
-		projectionMatrix.elements[2 + 3 * 4] = -(2 * FAR_PLANE * NEAR_PLANE) / frustumLength;
-		projectionMatrix.elements[3 + 2 * 4] = -1;
-	}
-	
+
 	public Matrix4f getProjectionMatrix() {
 		return projectionMatrix;
+	}
+	
+	public void sizeCheck() {
+		int[] size = WindowResizeInput.getSize(window);
+		float newAspectRatio = (float) size[0] / (float) size[1];
+		if(aspectRatio != newAspectRatio) {
+			isSizeChange = true;
+			aspectRatio = (float) size[0] / (float) size[1];
+			createProjectionMatrix();
+			GL11.glViewport(0, 0, size[0], size[1]);
+		}
 	}
 	
 	public void remove() {
@@ -172,6 +195,19 @@ public class MasterRenderer {
 		terrainShader.remove();
 		skyboxShader.remove();
 		octreeShader.remove();
+		waterShader.remove();
 	}
-
+	
+	private void createProjectionMatrix() {
+		float yScale = (float) (1f / Math.tan(Math.toRadians(FOV / 2f))), xScale = yScale / aspectRatio;
+		float frustumLength = FAR_PLANE - NEAR_PLANE; //zm
+		
+		projectionMatrix = new Matrix4f();
+		projectionMatrix.elements[0][0] = xScale;
+		projectionMatrix.elements[1][1] = yScale;
+		projectionMatrix.elements[2][2] = -(FAR_PLANE + NEAR_PLANE) / frustumLength;
+		projectionMatrix.elements[2][3] = -(2 * FAR_PLANE * NEAR_PLANE) / frustumLength;
+		projectionMatrix.elements[3][2] = -1;
+	}
+	
 }

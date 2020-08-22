@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL20;
 
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
+import com.flyn.game_engine.math.Vector4f;
 import com.flyn.game_engine.utils.FileUtils;
 public abstract class ShaderProgram {
 	
@@ -43,10 +44,14 @@ public abstract class ShaderProgram {
 	}
 	
 	protected void setUniform3f(String name, Vector3f vector) {
-		glUniform3f(getUniform(name), vector.x, vector.y, vector.z);
+		glUniform3f(getUniform(name), vector.x(), vector.y(), vector.z());
 	}
 	
-	protected void setUniform4f(String name, Matrix4f matrix) {
+	protected void setUniform4f(String name, Vector4f vector) {
+		glUniform4f(getUniform(name), vector.x(), vector.y(), vector.z(), vector.w());
+	}
+	
+	protected void setUniform4m(String name, Matrix4f matrix) {
 		glUniformMatrix4fv(getUniform(name), false, matrix.toFloatBuffer());
 	}
 	

@@ -18,7 +18,7 @@ public class GuiShader extends ShaderProgram {
 	}
 	
 	public void setTransformation(Matrix4f transformation) {
-		setUniform4f("transformation", transformation);
+		setUniform4m("transformation", transformation);
 	}
 
 }

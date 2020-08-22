@@ -25,22 +25,20 @@ public class Camera implements MouseMotionInterface, WheelInterface {
 	}
 	
 	public void move() {
-		float angleX = (float) Math.toRadians(rotation.y), angleY = (float) Math.toRadians(rotation.x);
+		float angleX = (float) Math.toRadians(rotation.y()), angleY = (float) Math.toRadians(rotation.x());
 		float horizontalDistance = distanceFromPlayer * (float) Math.cos(angleY);
-		float playerPitch = (float) Math.toRadians(player.getRotation().y);
+		float playerPitch = (float) Math.toRadians(player.getRotation().y());
 		float x = horizontalDistance * (float) Math.sin(angleX + playerPitch);
 		float y = distanceFromPlayer * (float) Math.sin(angleY);
 		float z = horizontalDistance * (float) Math.cos(angleX + playerPitch);
-		position.x = player.getPosition().x - x;
-		position.y = player.getPosition().y + y + 0.5f;
-		position.z = player.getPosition().z - z;
+		position.setXYZ(player.getPosition().x() - x, player.getPosition().y() + y + 0.5f, player.getPosition().z() - z);
 	}
 
 	public Matrix4f createViewMatrix() {
-		Matrix4f translate = Matrix4f.translate(new Vector3f(-position.x, -position.y, -position.z));
-		Matrix4f roll = Matrix4f.roll(rotation.x);
-		Matrix4f pitch = Matrix4f.pitch(180 - (player.getRotation().y + rotation.y));
-		return translate.multiply(pitch).multiply(roll);
+		Matrix4f translate = Matrix4f.translate(new Vector3f(-position.x(), -position.y(), -position.z()));
+		Matrix4f roll = Matrix4f.roll(rotation.x());
+		Matrix4f pitch = Matrix4f.pitch(180 - (player.getRotation().y() + rotation.y()));
+		return (Matrix4f) roll.multiply(pitch).multiply(translate);
 	}
 
 	@Override
@@ -58,14 +56,14 @@ public class Camera implements MouseMotionInterface, WheelInterface {
 				mousePosY = y;
 			}
 			else {
-				rotation.y -= (x - mousePosX) * 0.1f;
+				rotation.add("y", (x - mousePosX) * -0.1f);
 				mousePosX = x;
-				if(rotation.y > 180) rotation.y -= 360;
-				else if(rotation.y < -180) rotation.y += 360;
-				rotation.x -= (y - mousePosY) * 0.3f;
+				if(rotation.y() > 180) rotation.add("y", -360);
+				else if(rotation.y() < -180) rotation.add("y", 360);
+				rotation.add("x", (y - mousePosY) * -0.3f);
 				mousePosY = y;
-				if(rotation.x > 90) rotation.x = 90;
-				else if(rotation.x < -90) rotation.x = -90;
+				if(rotation.x() > 90) rotation.set("x", 90);
+				else if(rotation.x() < -90) rotation.set("x", -90);
 			}
 		}
 		else mousePosX = -1;

@@ -8,9 +8,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.flyn.game_engine.basic.Window;
+import com.flyn.game_engine.math.Matrix;
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.SimplexNoise2D;
 import com.flyn.game_engine.math.Vector3f;
+import com.flyn.game_engine.math.Vector4f;
 
 public class App {
 
@@ -23,11 +25,11 @@ public class App {
 		}).start();
 		
 //		Matrix4f m = new Matrix4f();
-//		m.elements[0] = 0.8033333f;
-//		m.elements[5] = 1.428148f;
-//		m.elements[10] = -1.0001999f;
-//		m.elements[11] = -1.0f;
-//		m.elements[14] = -0.20002f;
+//		m.elements[0][0] = 0.8033333f;
+//		m.elements[1][1] = 1.428148f;
+//		m.elements[2][2] = -1.0001999f;
+//		m.elements[3][2] = -1.0f;
+//		m.elements[2][3] = -0.20002f;
 //		System.out.println(m);
 //		System.out.println(m.getDet());	
 		
@@ -56,16 +58,6 @@ public class App {
 //		System.out.printf("bc : %f, my : %f, d : %f%n", bc, my, bc - my);
 //		System.out.printf("t1 : %d, t2 : %d", tb - ta, tc - tb);
 //		new Window();
-	}
-	
-
-	
-	public static float test(Vector3f p1, Vector3f p2, Vector3f p3, float x, float y) {
-		float xy = x + y;
-		float y1 = xy * (p2.y - p1.y) / p2.x + p1.y;
-		float y2 = xy * (p3.y - p1.y) / p3.z + p1.y;
-		float r = x / xy;
-		return r * y1 + (1 - r) * y2;
 	}
 	
 	private static class TestFrame extends JPanel {

@@ -17,12 +17,16 @@ uniform vec3 lightPosition[4];
 uniform float useFakeLight;
 uniform vec2 textureAmount;
 uniform vec2 textureOffset;
+uniform vec4 clipPlane;
 
 const float fogDensity = 0.03;
 const float forGradient = 1.5;
 
 void main() {
 	vec4 worldPosition = transformation * position;
+	
+	gl_ClipDistance[0] = dot(worldPosition, clipPlane);
+	
 	vec4 positionToCamera = view * worldPosition;
 	gl_Position = projection * positionToCamera;
 	coords = vec2(texturedCoords.x / textureAmount.x, texturedCoords.y / textureAmount.y) + textureOffset;

@@ -2,47 +2,90 @@ package com.flyn.game_engine.math;
 
 import java.awt.Color;
 
-public class Vector3f {
-
-	public float x, y, z;
+public class Vector3f extends Vector {
 	
 	public Vector3f() {
-		x = 0;
-		y = 0;
-		z = 0;
+		super(3);
 	}
 	
 	public Vector3f(float x, float y, float z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		super(3);
+		elements[0][0] = x;
+		elements[1][0] = y;
+		elements[2][0] = z;
 	}
 	
 	public Vector3f(Color color) {
-		x = color.getRed() / 255f;
-		y = color.getGreen() / 255f;
-		z = color.getBlue() / 255f;
+		super(3);
+		elements[0][0] = color.getRed() / 255f;
+		elements[1][0] = color.getGreen() / 255f;
+		elements[2][0] = color.getBlue() / 255f;
 	}
 	
-	public float length() {
-		double dx = x, dy = y, dz = z;
-		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+	public float x() {
+		return elements[0][0];
 	}
 	
-	public Vector3f normalise() {
-		float length = length();
-		Vector3f result = new Vector3f(x / length, y / length, z / length);
-		return result;
+	public float y() {
+		return elements[1][0];
 	}
 	
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("");
-		sb.append(x);
-		sb.append(", ");
-		sb.append(y);
-		sb.append(", ");
-		sb.append(z);
-		return sb.toString();
+	public float z() {
+		return elements[2][0];
 	}
+	
+	public void set(String target, float... value) {
+		int p = 0;
+		a:
+		for(char c : target.toCharArray()) {
+			switch(c) {
+			case 'x':
+				elements[0][0] = value[p++];
+				break;
+			case 'y':
+				elements[1][0] = value[p++];
+				break;
+			case 'z':
+				elements[2][0] = value[p++];
+				break;
+			default :
+				System.err.println("Contain the illegal character! At : " + target.indexOf(c));
+				break a;
+			}
+		}
+	}
+	
+	public void add(String target, float... value) {
+		int p = 0;
+		a:
+		for(char c : target.toCharArray()) {
+			switch(c) {
+			case 'x':
+				elements[0][0] += value[p++];
+				break;
+			case 'y':
+				elements[1][0] += value[p++];
+				break;
+			case 'z':
+				elements[2][0] += value[p++];
+				break;
+			default :
+				System.err.println("Contain the illegal character! At : " + target.indexOf(c));
+				break a;
+			}
+		}
+	}
+	
+	public void setXYZ(float x, float y, float z) {
+		elements[0][0] = x;
+		elements[1][0] = y;
+		elements[2][0] = z;
+	}
+	
+	public void addXYZ(float x, float y, float z) {
+		elements[0][0] += x;
+		elements[1][0] += y;
+		elements[2][0] += z;
+	}
+
 }

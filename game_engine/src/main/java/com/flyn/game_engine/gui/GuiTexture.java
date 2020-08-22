@@ -10,7 +10,7 @@ public class GuiTexture {
 	private int textureID;
 	private float x, y, w, h;
 	
-	public GuiTexture(int textureID, int x, int y, int width, int height) {
+	public GuiTexture(int textureID, float x, float y, float width, float height) {
 		this.textureID = textureID;
 		this.x = x;
 		this.y = y;
@@ -23,11 +23,9 @@ public class GuiTexture {
 	}
 	
 	public Matrix4f getTransformationMatirx(long window) {
-		int[] width = new int[1], height = new int[1];
-		GLFW.glfwGetWindowSize(window, width, height);
-		Matrix4f translate = Matrix4f.translate(new Vector3f(2 * x / (float) width[0], -2 * y / (float) height[0], 0));
-		Matrix4f scale = Matrix4f.zoom(w / (float) width[0], h / (float) height[0], 0);
-		return scale.multiply(translate).multiply(Matrix4f.translate(new Vector3f(-1, 1, 0)));
+		Matrix4f translate = Matrix4f.translate(new Vector3f(2 * x - 1, -2 * y + 1, 0));
+		Matrix4f scale = Matrix4f.zoom(w, h, 0);
+		return (Matrix4f) translate.multiply(scale);
 	}
 	
 }

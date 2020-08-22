@@ -9,16 +9,13 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import com.flyn.game_engine.basic.RawModel;
-import com.flyn.game_engine.math.Matrix4f;
-
 public class TerrainRenderer {
 	
 	private TerrainShader shader;
 	
-	public TerrainRenderer(TerrainShader shader, Matrix4f projectionMatrix) {
+	public TerrainRenderer(TerrainShader shader) {
 		this.shader = shader;
 		shader.enable();
-		shader.setProjection(projectionMatrix);
 		shader.connectTextureUnit();
 		shader.disable();
 	}

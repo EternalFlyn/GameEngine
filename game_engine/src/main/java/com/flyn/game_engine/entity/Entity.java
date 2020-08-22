@@ -50,9 +50,9 @@ public class Entity {
 	
 	private void updateMatrix() {
 		Matrix4f translate = Matrix4f.translate(position);
-		Matrix4f rotation = Matrix4f.rotate(this.rotation.x, this.rotation.y, this.rotation.z);
-		Matrix4f scale = Matrix4f.zoom(this.scale.x, this.scale.y, this.scale.z);
-		transformationMatirx = rotation.multiply(scale).multiply(translate);
+		Matrix4f rotation = Matrix4f.rotate(this.rotation.x(), this.rotation.y(), this.rotation.z());
+		Matrix4f scale = Matrix4f.zoom(this.scale.x(), this.scale.y(), this.scale.z());
+		transformationMatirx = (Matrix4f) translate.multiply(scale).multiply(rotation);
 	}
 
 	public Vector3f getPosition() {
@@ -65,9 +65,7 @@ public class Entity {
 	}
 	
 	public void move(float dx, float dy, float dz) {
-		position.x += dx;
-		position.y += dy;
-		position.z += dz;
+		position.addXYZ(dx, dy, dz);
 		updateMatrix();
 	}
 	
@@ -81,9 +79,7 @@ public class Entity {
 	}
 	
 	public void rotate(float dx, float dy, float dz) {
-		rotation.x += dx;
-		rotation.y += dy;
-		rotation.z += dz;
+		rotation.addXYZ(dx, dy, dz);
 		updateMatrix();
 	}
 
@@ -97,9 +93,7 @@ public class Entity {
 	}
 	
 	public void zoom(float dx, float dy, float dz) {
-		scale.x += dx;
-		scale.y += dy;
-		scale.z += dz;
+		scale.addXYZ(dx, dy, dz);
 		updateMatrix();
 	}
 	

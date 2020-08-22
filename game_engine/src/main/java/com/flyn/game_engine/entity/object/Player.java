@@ -25,14 +25,14 @@ public class Player extends Entity {
 		checkInputs();
 		float frameTime = Window.getFrameTimeSeconds();
 		rotate(0, currentTurnSpeed * frameTime, 0);
-		float distance = currentSpeed * frameTime, pitch = (float) Math.toRadians(getRotation().y);
+		float distance = currentSpeed * frameTime, pitch = (float) Math.toRadians(getRotation().y());
 		ySpeed += GRAVITY * frameTime;
 		move(distance * (float) Math.sin(pitch), ySpeed * frameTime, distance * (float) Math.cos(pitch));
-		float terrainHeight = terrain.getHeight(getPosition().x, getPosition().z);
-		if(getPosition().y < terrainHeight){
+		float terrainHeight = terrain.getHeight(getPosition().x(), getPosition().z());
+		if(getPosition().y() < terrainHeight){
 			ySpeed = 0;
 			isJump = false;
-			setPosition(new Vector3f(getPosition().x, terrainHeight, getPosition().z));
+			setPosition(new Vector3f(getPosition().x(), terrainHeight, getPosition().z()));
 		}
 	}
 	

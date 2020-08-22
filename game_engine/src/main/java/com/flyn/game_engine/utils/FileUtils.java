@@ -102,12 +102,12 @@ public class FileUtils {
 						if(!NumberList.contains(vertexNumber)) {
 							NumberList.add(vertexNumber);
 							Vector3f textureVector = texturesArray.get(Integer.parseInt(faceData[1]) - 1);
-							textures[vertexNumber * 2] = textureVector.x;
-							textures[vertexNumber * 2 + 1] = 1 - textureVector.y;
+							textures[vertexNumber * 2] = textureVector.x();
+							textures[vertexNumber * 2 + 1] = 1 - textureVector.y();
 							Vector3f normalVector = normalsArray.get(Integer.parseInt(faceData[2]) - 1);
-							normals[vertexNumber * 3] = normalVector.x;
-							normals[vertexNumber * 3 + 1] = normalVector.y;
-							normals[vertexNumber * 3 + 2] = normalVector.z;
+							normals[vertexNumber * 3] = normalVector.x();
+							normals[vertexNumber * 3 + 1] = normalVector.y();
+							normals[vertexNumber * 3 + 2] = normalVector.z();
 						}
 					}
 				}
@@ -131,7 +131,6 @@ public class FileUtils {
 		ArrayList<Vector3f> texturesArray = new ArrayList<>(), normalsArray = new ArrayList<>();
 		ArrayList<Integer> indeicsArray = new ArrayList<>();
 		float[] vertices = null, textures = null, normals = null;
-		int[] indices = null;
 		boolean inFaceData = false;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(filePath));
@@ -165,12 +164,12 @@ public class FileUtils {
 						if(!NumberList.contains(vertexNumber)) {
 							NumberList.add(vertexNumber);
 							Vector3f textureVector = texturesArray.get(Integer.parseInt(faceData[1]) - 1);
-							textures[vertexNumber * 2] = textureVector.x;
-							textures[vertexNumber * 2 + 1] = 1 - textureVector.y;
+							textures[vertexNumber * 2] = textureVector.x();
+							textures[vertexNumber * 2 + 1] = 1 - textureVector.y();
 							Vector3f normalVector = normalsArray.get(Integer.parseInt(faceData[2]) - 1);
-							normals[vertexNumber * 3] = normalVector.x;
-							normals[vertexNumber * 3 + 1] = normalVector.y;
-							normals[vertexNumber * 3 + 2] = normalVector.z;
+							normals[vertexNumber * 3] = normalVector.x();
+							normals[vertexNumber * 3 + 1] = normalVector.y();
+							normals[vertexNumber * 3 + 2] = normalVector.z();
 						}
 					}
 				}
@@ -178,7 +177,6 @@ public class FileUtils {
 			reader.close();
 			Iterator<Float> iter = verticesArray.iterator();
 			for(int i = 0; i < vertices.length; i++) vertices[i] = iter.next();
-			indices = indeicsArray.stream().mapToInt(i -> i).toArray();
 		} catch (NumberFormatException | IOException e) {
 			System.err.println("Couldn't find the file : " + filePath);
 			e.printStackTrace();

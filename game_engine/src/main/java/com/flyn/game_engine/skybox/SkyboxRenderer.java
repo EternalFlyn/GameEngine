@@ -34,7 +34,7 @@ public class SkyboxRenderer {
 	private RawModel cube;
 	private int dayTexture, nightTexture;
 	
-	public SkyboxRenderer(SkyboxShader shader, Matrix4f projectionMatrix) {
+	public SkyboxRenderer(SkyboxShader shader) {
 		float[] vertices = {        
 			    -SIZE,  SIZE, -SIZE,
 			    -SIZE, -SIZE, -SIZE,
@@ -83,7 +83,6 @@ public class SkyboxRenderer {
 		nightTexture = Loader.loadCubeMap(NIGHT_TEXTURE_FILES);
 		shader.enable();
 		shader.connectTextureUnit();
-		shader.setProjection(projectionMatrix);
 		shader.disable();
 	}
 	

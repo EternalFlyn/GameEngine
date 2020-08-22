@@ -26,15 +26,15 @@ public class TerrainShader extends ShaderProgram {
 	}
 	
 	public void setTransformation(Matrix4f transformation) {
-		setUniform4f("transformation", transformation);
+		setUniform4m("transformation", transformation);
 	}
 	
 	public void setProjection(Matrix4f projection) {
-		setUniform4f("projection", projection);
+		setUniform4m("projection", projection);
 	}
 	
 	public void setViewPosition(Matrix4f camera) {
-		setUniform4f("view", camera);
+		setUniform4m("view", camera);
 	}
 	
 	public void setLight(ArrayList<Light> lights) {

@@ -43,9 +43,9 @@ public class Terrain {
 				vertices[pointer * 3 + 1] = heights[x][z];
 				vertices[pointer * 3 + 2] = (float) z / ((float) VERTEX_COUNT - 1) * SIZE;
 				Vector3f normal = calculateNormal(x, z, heights);
-				normals[pointer * 3] = normal.x;
-				normals[pointer * 3 + 1] = normal.y;
-				normals[pointer * 3 + 2] = normal.z;
+				normals[pointer * 3] = normal.x();
+				normals[pointer * 3 + 1] = normal.y();
+				normals[pointer * 3 + 2] = normal.z();
 				textureCoords[pointer * 2] = (float) x / ((float) VERTEX_COUNT - 1);
 				textureCoords[pointer * 2 + 1] = (float) z / ((float) VERTEX_COUNT - 1);
 				pointer++;
@@ -100,16 +100,16 @@ public class Terrain {
 		float R = x < -1 || x > heights.length - 2 ? 0 : heights[x+1][z];
 		float B = z < 1 || z > heights[x].length ? 0 : heights[x][z-1];
 		float T = z < -1 || z > heights[x].length - 2 ? 0 : heights[x][z+1];
-		Vector3f normal = new Vector3f(L - R, 2, B - T).normalise();
+		Vector3f normal = (Vector3f) new Vector3f(L - R, 2, B - T).normalise();
 		return normal;
 	}
 	
 	private float baryCentric(Vector3f p1, Vector3f p2, Vector3f p3, float x, float y) {
-		float det = (p2.z - p3.z) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.z - p3.z);
-		float l1 = ((p2.z - p3.z) * (x - p3.x) + (p3.x - p2.x) * (y - p3.z)) / det;
-		float l2 = ((p3.z - p1.z) * (x - p3.x) + (p1.x - p3.x) * (y - p3.z)) / det;
+		float det = (p2.z() - p3.z()) * (p1.x() - p3.x()) + (p3.x() - p2.x()) * (p1.z() - p3.z());
+		float l1 = ((p2.z() - p3.z()) * (x - p3.x()) + (p3.x() - p2.x()) * (y - p3.z())) / det;
+		float l2 = ((p3.z() - p1.z()) * (x - p3.x()) + (p1.x() - p3.x()) * (y - p3.z())) / det;
 		float l3 = 1.0f - l1 - l2;
-		return l1 * p1.y + l2 * p2.y + l3 * p3.y;
+		return l1 * p1.y() + l2 * p2.y() + l3 * p3.y();
 	}
 
 	public float getX() {
