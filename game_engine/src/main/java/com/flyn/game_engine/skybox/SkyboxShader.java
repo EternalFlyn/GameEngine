@@ -24,8 +24,8 @@ public class SkyboxShader extends ShaderProgram {
 		setUniform4m("projection", projection);
 	}
 	
-	public void setViewPosition(Matrix4f camera) {
-		setUniform4m("view", camera);
+	public void setViewPosition(Matrix4f view) {
+		setUniform4m("view", view);
 	}
 	
 	public void setSkyColor(Color color) {

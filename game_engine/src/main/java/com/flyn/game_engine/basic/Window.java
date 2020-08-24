@@ -26,12 +26,16 @@ import com.flyn.game_engine.input.MouseInput;
 import com.flyn.game_engine.input.MouseMotionInput;
 import com.flyn.game_engine.input.WheelInput;
 import com.flyn.game_engine.input.WindowResizeInput;
+import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Octree;
 import com.flyn.game_engine.math.Vector3f;
+import com.flyn.game_engine.math.Vector4f;
 import com.flyn.game_engine.terrain.Terrain;
 import com.flyn.game_engine.utils.FileUtils;
 import com.flyn.game_engine.utils.Loader;
 import com.flyn.game_engine.water.WaterFrameBuffers;
+import com.flyn.game_engine.water.WaterRenderer;
+import com.flyn.game_engine.water.WaterShader;
 import com.flyn.game_engine.water.WaterTile;
 
 public class Window {
@@ -44,6 +48,7 @@ public class Window {
 	
 	private ArrayList<Light> lights = new ArrayList<>();
 	private ArrayList<GuiTexture> guis = new ArrayList<>();
+	private ArrayList<WaterTile> waters = new ArrayList<>();
 	
 	public Window() {
 		if(!glfwInit()) {
@@ -91,7 +96,8 @@ public class Window {
 //		renderer.addTerrain(terrain2);
 //		terrain2.setGrassColor(new Color(153, 255, 77));
 		
-		lights.add(new Light(new Vector3f(0, 10000, 0), new Vector3f(1, 1, 1), new Vector3f(1, 0, 0)));
+		Light sun = new Light(new Vector3f(0, 10000, 0), new Vector3f(1, 1, 1));
+		lights.add(sun);
 		lights.add(new Light(new Vector3f(1, 1, 1), new Vector3f(Color.red), new Vector3f(1, 0.1f, 0.02f)));
 		lights.add(new Light(new Vector3f(1, 1, -1), new Vector3f(Color.green), new Vector3f(1, 0.1f, 0.02f)));
 		lights.add(new Light(new Vector3f(-1, 1, -1), new Vector3f(Color.blue), new Vector3f(1, 0.1f, 0.02f)));
@@ -105,11 +111,16 @@ public class Window {
 		
 		Texture girlTexture = new Texture(Loader.loadColorTexture(Color.white));
 		RawModel girlModel = FileUtils.loadObjFile("src/main/java/model/girl.obj");
-		Entity girl = new Entity(girlModel, girlTexture, new Vector3f(-1, 0, -1), new Vector3f(-90, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));
-		renderer.addEntity(girl);
-		Player player = new Player(girlModel, girlTexture, new Vector3f(0, 0, 0), new Vector3f(-90, 180, 0), new Vector3f(0.1f, 0.1f, 0.1f));
+		Entity girl = new Entity(girlModel, girlTexture, new Vector3f(-1, 0, -1), new Vector3f(-90, 0, 0), 0.2f);
+//		renderer.addEntity(girl);
+		Player player = new Player(girlModel, girlTexture, new Vector3f(0, 0, 0), new Vector3f(-90, 180, 0), new Vector3f(0.2f, 0.2f, 0.2f));
 		renderer.addEntity(player);
 		Camera camera = new Camera(player);
+		
+//		Texture mikuTexture = new Texture(Loader.loadTexture("src/main/java/texture/Dif_Body.png"));
+//		RawModel mikuModel = FileUtils.loadObjFile("src/main/java/model/どっと式初音ミク_ハニーウィップ.obj");
+//		Entity miku = new Entity(mikuModel, mikuTexture, new Vector3f(-2f, 0, -1), new Vector3f(0, 0, 0), 0.075f);
+//		renderer.addEntity(miku);
 		
 		for(int i = 0; i < 100; i++) {
 			Random ran = new Random();
@@ -123,10 +134,22 @@ public class Window {
 			renderer.addEntity(new Torch(new Vector3f(x, terrain.getHeight(x, z), z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)));
 		}
 		
-		WaterTile water = new WaterTile(-2, 0, -1);
-		renderer.addWater(water);
 		WaterFrameBuffers fbos = new WaterFrameBuffers(window);
-		guis.add(new GuiTexture(fbos.getReflectionTexture(), 0, 0, 0.2f, 0.25f));
+//		guis.add(new GuiTexture(fbos.getReflectionTexture(), 0, 0, 0.2f, 0.25f));
+//		guis.add(new GuiTexture(fbos.getRefractionTexture(), 0, 0.25f, 0.2f, 0.25f));
+		
+		WaterRenderer waterRenderer = new WaterRenderer(renderer.getProjectionMatrix(), fbos);
+		WaterTile water = new WaterTile(-2, 1, -1);
+		WaterTile water2 = new WaterTile(-2, 1, 1);
+		WaterTile water3 = new WaterTile(0, 1, -1);
+		WaterTile water4 = new WaterTile(0, 1, 1);
+		waters.add(water);
+		waters.add(water2);
+		waters.add(water3);
+		waters.add(water4);
+		
+		Vector4f reflectionPlane = new Vector4f((Vector3f) new Vector3f(0, 1, 0).normalise(), -1.1f);
+		Vector4f refractionPlane = new Vector4f((Vector3f) new Vector3f(0, -1, 0).normalise(), 1.1f);
 		
 //		long tt = System.nanoTime();
 //		Octree o = FileUtils.test("src/main/java/model/dragon.obj");
@@ -141,23 +164,36 @@ public class Window {
 			for(int i = 0; i < executes.size(); i++) {
 				if(executes.get(i).execute(time)) executes.remove(i);
 			}
+			
+			girl.rotate(0, 1, 0);
 			player.move(terrain);
 			camera.move();
+			Matrix4f view = camera.createViewMatrix();
 //			System.out.println(picker.getCurrentRay(camera.createViewMatrix()));
+			
 			GL11.glEnable(GL30.GL_CLIP_DISTANCE0);
-			
 			fbos.bindReflectionFrameBuffer();
-			renderer.render(time, lights, camera);
-			fbos.unbindCurrentFrameBuffer();
+			if(reflectionPlane.dot(new Vector4f(camera.getPosition(), 1)) < 0) reflectionPlane = (Vector4f) reflectionPlane.multiply(-1);
+			Matrix4f mirrorView = camera.createReflectViewMatrix(reflectionPlane);
+			renderer.render(time, lights, mirrorView, reflectionPlane);
 			
-			renderer.render(time, lights, camera);
+			fbos.bindRefractionFrameBuffer();
+			if(refractionPlane.dot(new Vector4f(camera.getPosition(), 1)) > 0) refractionPlane = (Vector4f) refractionPlane.multiply(-1);
+			renderer.render(time, lights, view, refractionPlane);
+			
+			GL11.glDisable(GL30.GL_CLIP_DISTANCE0);
+			fbos.unbindCurrentFrameBuffer();
+			renderer.render(time, lights, view, reflectionPlane);
+			
+			waterRenderer.render(waters, camera, sun);
+			
 			gui.render(guis);
 			glfwSwapBuffers(window);
-			girl.rotate(0, 1, 0);
 //			System.out.println("FPS:" + 1 / getFrameTimeSeconds());
 		}
 		
 		renderer.remove();
+		waterRenderer.remove();
 		gui.remove();
 		Loader.clean();
 		glfwTerminate();

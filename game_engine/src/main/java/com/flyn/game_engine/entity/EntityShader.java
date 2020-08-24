@@ -34,8 +34,8 @@ public class EntityShader extends ShaderProgram {
 		setUniform4m("projection", projection);
 	}
 	
-	public void setViewPosition(Matrix4f camera) {
-		setUniform4m("view", camera);
+	public void setViewPosition(Matrix4f view) {
+		setUniform4m("view", view);
 	}
 	
 	public void setLight(ArrayList<Light> lights) {
@@ -77,7 +77,7 @@ public class EntityShader extends ShaderProgram {
 	}
 	
 	public void setClipPlane(Vector4f plane) {
-		setUniform4f("clipPlane", a, b, c, d);
+		setUniform4f("clipPlane", plane);
 	}
 
 }

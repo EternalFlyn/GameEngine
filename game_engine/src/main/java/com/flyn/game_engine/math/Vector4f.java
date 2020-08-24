@@ -14,6 +14,14 @@ public class Vector4f extends Vector {
 		elements[3][0] = w;
 	}
 	
+	public Vector4f(Vector3f normal, float distance) {
+		super(4);
+		elements[0][0] = normal.x();
+		elements[1][0] = normal.y();
+		elements[2][0] = normal.z();
+		elements[3][0] = distance;
+	}
+	
 	public float x() {
 		return elements[0][0];
 	}

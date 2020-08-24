@@ -10,6 +10,7 @@ import com.flyn.game_engine.input.WheelInput;
 import com.flyn.game_engine.input.WheelInterface;
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
+import com.flyn.game_engine.math.Vector4f;
 
 public class Camera implements MouseMotionInterface, WheelInterface {
 	
@@ -31,7 +32,7 @@ public class Camera implements MouseMotionInterface, WheelInterface {
 		float x = horizontalDistance * (float) Math.sin(angleX + playerPitch);
 		float y = distanceFromPlayer * (float) Math.sin(angleY);
 		float z = horizontalDistance * (float) Math.cos(angleX + playerPitch);
-		position.setXYZ(player.getPosition().x() - x, player.getPosition().y() + y + 0.5f, player.getPosition().z() - z);
+		position.setXYZ(player.getPosition().x() - x, player.getPosition().y() + y + 1.5f, player.getPosition().z() - z);
 	}
 
 	public Matrix4f createViewMatrix() {
@@ -39,6 +40,21 @@ public class Camera implements MouseMotionInterface, WheelInterface {
 		Matrix4f roll = Matrix4f.roll(rotation.x());
 		Matrix4f pitch = Matrix4f.pitch(180 - (player.getRotation().y() + rotation.y()));
 		return (Matrix4f) roll.multiply(pitch).multiply(translate);
+	}
+	
+	public Matrix4f createReflectViewMatrix(Vector4f plane) {
+		Matrix4f translate = Matrix4f.translate(new Vector3f(-position.x(), -position.y(), -position.z()));
+		Matrix4f roll = Matrix4f.roll(rotation.x());
+		Matrix4f pitch = Matrix4f.pitch(180 - (player.getRotation().y() + rotation.y()));
+		return (Matrix4f) roll.multiply(pitch).multiply(translate).multiply(Matrix4f.reflect(plane));
+	}
+
+	public Vector3f getPosition() {
+		return position;
+	}
+
+	public Vector3f getRotation() {
+		return rotation;
 	}
 
 	@Override

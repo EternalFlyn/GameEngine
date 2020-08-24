@@ -14,12 +14,16 @@ uniform mat4 transformation;
 uniform mat4 projection;
 uniform mat4 view;
 uniform vec3 lightPosition[4];
+uniform vec4 clipPlane;
 
 const float fogDensity = 0.01;
 const float forGradient = 1.5;
 
 void main() {
 	vec4 worldPosition = transformation * position;
+	
+	gl_ClipDistance[0] = dot(worldPosition, clipPlane);
+	
 	vec4 positionToCamera = view * worldPosition;
 	gl_Position = projection * positionToCamera;
 	coords = texturedCoords;

@@ -25,6 +25,15 @@ public class Entity {
 		updateMatrix();
 	}
 	
+	public Entity(RawModel model, Texture texture, Vector3f position, Vector3f rotation, float scale) {
+		this.model = model;
+		this.texture = texture;
+		this.position = position;
+		this.rotation = rotation;
+		this.scale = new Vector3f(scale, scale, scale);
+		updateMatrix();
+	}
+	
 	protected Entity(RawModel model, Vector3f position, Vector3f rotation, Vector3f scale) {
 		this.model = model;
 		this.texture = new Texture(Loader.loadColorTexture(Color.white));

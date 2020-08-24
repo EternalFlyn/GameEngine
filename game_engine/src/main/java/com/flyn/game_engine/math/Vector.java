@@ -6,6 +6,12 @@ public class Vector extends Matrix {
 		super(dimension, 1);
 	}
 	
+	public float dot(Vector vector) {
+		float result = 0;
+		for(int i = 0; i < row; i++) result += elements[i][0] * vector.elements[i][0];
+		return result;
+	}
+	
 	public float length() {
 		float sum = 0;
 		for(int i = 0; i < row; i++) {

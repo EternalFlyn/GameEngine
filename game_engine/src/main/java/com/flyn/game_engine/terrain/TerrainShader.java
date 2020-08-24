@@ -7,6 +7,7 @@ import com.flyn.game_engine.basic.Light;
 import com.flyn.game_engine.basic.ShaderProgram;
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
+import com.flyn.game_engine.math.Vector4f;
 
 public class TerrainShader extends ShaderProgram {
 
@@ -33,8 +34,8 @@ public class TerrainShader extends ShaderProgram {
 		setUniform4m("projection", projection);
 	}
 	
-	public void setViewPosition(Matrix4f camera) {
-		setUniform4m("view", camera);
+	public void setViewPosition(Matrix4f view) {
+		setUniform4m("view", view);
 	}
 	
 	public void setLight(ArrayList<Light> lights) {
@@ -73,5 +74,10 @@ public class TerrainShader extends ShaderProgram {
 		setUniform1i("bTexture", 3);
 		setUniform1i("blendMap", 4);
 	}
+	
+	public void setClipPlane(Vector4f plane) {
+		setUniform4f("clipPlane", plane);
+	}
+
 	
 }

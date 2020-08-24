@@ -131,6 +131,28 @@ public class Matrix4f extends Matrix {
 		return result;
 	}
 	
+	public static Matrix4f reflect(Vector4f plane) {
+		Matrix4f result = identity();
+		float a = plane.x(), b = plane.y(), c = plane.z(), d = plane.w();
+		result.elements[0][0] = 1 - 2 * a * a;
+		result.elements[1][0] = -2 * a * b;
+		result.elements[2][0] = -2 * a * c;
+		
+		result.elements[0][1] = -2 * b * a;
+		result.elements[1][1] = 1 - 2 * b * b;
+		result.elements[2][1] = -2 * b * c;
+		
+		result.elements[0][2] = -2 * c * a;
+		result.elements[1][2] = -2 * c * b;
+		result.elements[2][2] = 1 - 2 * c * c;
+		
+		result.elements[0][3] = -2 * d * a;
+		result.elements[1][3] = -2 * d * b;
+		result.elements[2][3] = -2 * d * c;
+		
+		return result;
+	}
+	
 	public double getDet() {
 		double[][] m = new double[4][4];
 		for(int i = 0; i < 4; i++) {
@@ -191,6 +213,16 @@ public class Matrix4f extends Matrix {
 			for(int j = 0; j < 4; j++) {
 				int sgn = (i + j) % 2 == 0 ? 1 : -1;
 				result.elements[i][j] = (float) (sgn * determinant(minor(m, j, i)) / det);
+			}
+		}
+		return result;
+	}
+	
+	public Matrix4f transpose() {
+		Matrix4f result = new Matrix4f();
+		for(int i = 0; i < row; i++) {
+			for(int j = 0; j < column; j++) {
+				result.elements[j][i] = elements[i][j];
 			}
 		}
 		return result;

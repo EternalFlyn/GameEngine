@@ -14,14 +14,12 @@ import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Octree;
 import com.flyn.game_engine.math.OctreeRenderer;
 import com.flyn.game_engine.math.OctreeShader;
+import com.flyn.game_engine.math.Vector4f;
 import com.flyn.game_engine.skybox.SkyboxRenderer;
 import com.flyn.game_engine.skybox.SkyboxShader;
 import com.flyn.game_engine.terrain.Terrain;
 import com.flyn.game_engine.terrain.TerrainRenderer;
 import com.flyn.game_engine.terrain.TerrainShader;
-import com.flyn.game_engine.water.WaterRenderer;
-import com.flyn.game_engine.water.WaterShader;
-import com.flyn.game_engine.water.WaterTile;
 
 public class MasterRenderer {
 	
@@ -31,8 +29,7 @@ public class MasterRenderer {
 	private static Color skyColor = new Color(94, 134, 193); //Pale Denim
 	
 	private final long window;
-	
-	private boolean isSizeChange;
+
 	private float aspectRatio = 0;
 	
 	private Matrix4f projectionMatrix;
@@ -49,13 +46,9 @@ public class MasterRenderer {
 	private OctreeShader octreeShader = new OctreeShader();
 	private OctreeRenderer octreeRenderer;
 	
-	private WaterShader waterShader = new WaterShader();
-	private WaterRenderer waterRenderer;
-	
 	private HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities = new HashMap<>();
 	private ArrayList<Terrain> terrains = new ArrayList<>();
 	private ArrayList<Octree> tree = new ArrayList<>();
-	private ArrayList<WaterTile> waters = new ArrayList<>();
 	
 	public MasterRenderer(long window) {
 		enableCulling();
@@ -65,7 +58,6 @@ public class MasterRenderer {
 		terrainRenderer = new TerrainRenderer(terrainShader);
 		skyboxRenderer = new SkyboxRenderer(skyboxShader);
 		octreeRenderer = new OctreeRenderer();
-		waterRenderer = new WaterRenderer(waterShader);
 	}
 	
 	public static void enableCulling() {
@@ -77,29 +69,27 @@ public class MasterRenderer {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
 	
-	public void render(long time, ArrayList<Light> lights, Camera camera) {
+	public void render(long time, ArrayList<Light> lights, Matrix4f view, Vector4f clipPlane) {
 		sizeCheck();
 		prepare();
-		Matrix4f view = camera.createViewMatrix();
 		
 		entityShader.enable();
-		if(isSizeChange) entityShader.setProjection(projectionMatrix);
 		entityShader.setViewPosition(view);
 		entityShader.setLight(lights);
 		entityShader.setSkyColor(skyColor);
+		entityShader.setClipPlane(clipPlane);
 		entityRenderer.render(entities);
 		entityShader.disable();
 		
 		terrainShader.enable();
-		if(isSizeChange) terrainShader.setProjection(projectionMatrix);
 		terrainShader.setViewPosition(view);
 		terrainShader.setLight(lights);
 		terrainShader.setSkyColor(skyColor);
+		terrainShader.setClipPlane(clipPlane);
 		terrainRenderer.render(terrains);
 		terrainShader.disable();
 		
 		skyboxShader.enable();
-		if(isSizeChange) skyboxShader.setProjection(projectionMatrix);
 		Matrix4f followView = new Matrix4f();
 		followView.fill(view);
 		followView.elements[0][3] = 0;
@@ -113,20 +103,9 @@ public class MasterRenderer {
 		skyboxShader.disable();
 		
 		octreeShader.enable();
-		if(isSizeChange) octreeShader.setProjection(projectionMatrix);
 		octreeShader.setViewPosition(view);
 		octreeRenderer.render(tree);
 		octreeShader.disable();
-		
-		waterShader.enable();
-		if(isSizeChange) waterShader.setProjection(projectionMatrix);
-		waterShader.setViewPosition(view);
-		waterRenderer.render(waters);
-		waterShader.disable();
-	}
-	
-	public void addWater(WaterTile water) {
-		waters.add(water);
 	}
 	
 	public void addOctree(Octree octree) {
@@ -166,6 +145,13 @@ public class MasterRenderer {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 	}
 	
+	public void remove() {
+		entityShader.remove();
+		terrainShader.remove();
+		skyboxShader.remove();
+		octreeShader.remove();
+	}
+	
 	private float dayNightSystem(long time) {
 		//0 day texture, 1 night texture
 		float hour = (int) (time % 24000);
@@ -174,28 +160,38 @@ public class MasterRenderer {
 		else if(hour > 17000 && hour <= 19000) return (hour - 17000) / 2000;
 		else return 1;
 	}
-
-	public Matrix4f getProjectionMatrix() {
-		return projectionMatrix;
-	}
 	
 	public void sizeCheck() {
 		int[] size = WindowResizeInput.getSize(window);
 		float newAspectRatio = (float) size[0] / (float) size[1];
 		if(aspectRatio != newAspectRatio) {
-			isSizeChange = true;
 			aspectRatio = (float) size[0] / (float) size[1];
 			createProjectionMatrix();
 			GL11.glViewport(0, 0, size[0], size[1]);
+			setProjectionMatrix();
 		}
 	}
 	
-	public void remove() {
-		entityShader.remove();
-		terrainShader.remove();
-		skyboxShader.remove();
-		octreeShader.remove();
-		waterShader.remove();
+	private void setProjectionMatrix() {
+		entityShader.enable();
+		entityShader.setProjection(projectionMatrix);
+		entityShader.disable();
+		
+		terrainShader.enable();
+		terrainShader.setProjection(projectionMatrix);
+		terrainShader.disable();
+		
+		skyboxShader.enable();
+		skyboxShader.setProjection(projectionMatrix);
+		skyboxShader.disable();
+		
+		octreeShader.enable();
+		octreeShader.setProjection(projectionMatrix);
+		octreeShader.disable();
+	}
+	
+	public Matrix4f getProjectionMatrix() {
+		return projectionMatrix;
 	}
 	
 	private void createProjectionMatrix() {

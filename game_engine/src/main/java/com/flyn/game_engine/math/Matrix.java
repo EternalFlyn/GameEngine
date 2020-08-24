@@ -11,6 +11,52 @@ public class Matrix {
 		elements = new float[row][column];
 	}
 	
+	public Matrix multiply(float scale) {
+		Matrix result = newMatrixObject(row, column);
+		for(int i = 0; i < row; i++) {
+			for(int j = 0; j < column; j++) {
+				result.elements[i][j] = scale * elements[i][j];
+			}
+		}
+		return result;
+	}
+	
+	public Matrix plus(Matrix matrix) {
+		if(row != matrix.row || column != matrix.column) {
+			try {
+				throw new MatrixSizeException();
+			} catch (MatrixSizeException e) {
+				e.printStackTrace();
+			}
+			System.exit(-1);
+		}
+		Matrix result = newMatrixObject(row, matrix.column);
+		for(int i = 0; i < row; i++) {
+			for(int j = 0; j < column; j++) {
+				result.elements[i][j] = elements[i][j] + matrix.elements[i][j];
+			}
+		}
+		return result;
+	}
+	
+	public Matrix minus(Matrix matrix) {
+		if(row != matrix.row || column != matrix.column) {
+			try {
+				throw new MatrixSizeException();
+			} catch (MatrixSizeException e) {
+				e.printStackTrace();
+			}
+			System.exit(-1);
+		}
+		Matrix result = newMatrixObject(row, matrix.column);
+		for(int i = 0; i < row; i++) {
+			for(int j = 0; j < column; j++) {
+				result.elements[i][j] = elements[i][j] - matrix.elements[i][j];
+			}
+		}
+		return result;
+	}
+	
 	public Matrix multiply(Matrix matrix) {
 		if(column != matrix.row) {
 			try {
