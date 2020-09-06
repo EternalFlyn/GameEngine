@@ -1,6 +1,7 @@
-package com.flyn.game_engine.math;
+package com.flyn.game_engine.misc;
 
 import com.flyn.game_engine.basic.ShaderProgram;
+import com.flyn.game_engine.math.Matrix4f;
 
 public class OctreeShader extends ShaderProgram{
 	

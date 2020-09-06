@@ -20,7 +20,7 @@ public class Vector extends Matrix {
 		return (float) Math.sqrt(sum);
 	}
 	
-	public Vector normalise() {
+	public Vector normalize() {
 		float length = length();
 		Vector result = (Vector) newMatrixObject(row, column);
 		for(int i = 0; i < row; i++) result.elements[i][0] = elements[i][0] / length;

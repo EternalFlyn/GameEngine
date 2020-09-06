@@ -44,14 +44,44 @@ public class WaterRenderer {
 		shader.setViewPosition(camera);
 		shader.setViewPlaneDistance(new Vector2f(MasterRenderer.NEAR_PLANE, MasterRenderer.FAR_PLANE));
 		shader.setSkyColor(skyColor);
+		shader.setLight(light);
+		
 		moveFactor += 0.03 * Window.getFrameTimeSeconds();
 		moveFactor %= 1;
 		shader.setMoveFactor(moveFactor);
-		shader.setLight(light);
+		
+		bindTextures();
 		
 		GL30.glBindVertexArray(quad.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
+		MasterRenderer.disableCulling();
+		for(WaterTile tile : water) {
+			shader.setTransformation(tile.getTransformationMatirx());
+			shader.setWaveStrength(tile.getWaveStrength());
+			GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, quad.getVertexCount());
+		}
+		MasterRenderer.enableCulling();
+		
+		GL11.glDisable(GL11.GL_BLEND);
+		GL20.glDisableVertexAttribArray(0);
+		GL30.glBindVertexArray(0);
+		shader.disable();
+	}
+	
+	public void setProjectionMatrix(Matrix4f projection) {
+		shader.enable();
+		shader.setProjection(projection);
+		shader.disable();
+	}
+	
+	public void remove() {
+		shader.remove();
+	}
+	
+	private void bindTextures() {
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, fbos.getReflectionTexture());
 		GL13.glActiveTexture(GL13.GL_TEXTURE1);
@@ -62,23 +92,6 @@ public class WaterRenderer {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, normalTexture);
 		GL13.glActiveTexture(GL13.GL_TEXTURE4);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, fbos.getRefractionDepthTexture());
-		
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		
-		for(WaterTile tile : water) {
-			shader.setTransformation(tile.getTransformationMatirx());
-			shader.setWaveStrength(tile.getWaveStrength());
-			GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, quad.getVertexCount());
-		}
-		GL11.glDisable(GL11.GL_BLEND);
-		GL20.glDisableVertexAttribArray(0);
-		GL30.glBindVertexArray(0);
-		shader.disable();
-	}
-	
-	public void remove() {
-		shader.remove();
 	}
 
 }

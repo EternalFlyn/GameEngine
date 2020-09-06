@@ -16,13 +16,16 @@ import com.flyn.game_engine.basic.RawModel;
 import com.flyn.game_engine.basic.Texture;
 import com.flyn.game_engine.math.Matrix4f;
 
-public class EntityRenderer {
+public class NormalMappingRenderer {
 	
-	private EntityShader shader;
+	private NormalMappingShader shader;
 	
-	public EntityRenderer(EntityShader shader, Matrix4f projection) {
+	public NormalMappingRenderer(NormalMappingShader shader, Matrix4f projection) {
 		this.shader = shader;
-		setProjectionMatrix(projection);
+		shader.enable();
+		shader.connectTextureUnit();
+		shader.setProjection(projection);
+		shader.disable();
 	}
 	
 	public void render(HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities) {
@@ -57,6 +60,7 @@ public class EntityRenderer {
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glEnableVertexAttribArray(2);
+		GL20.glEnableVertexAttribArray(3);
 	}
 	
 	private void prepareTexture(Texture texture) {
@@ -65,6 +69,8 @@ public class EntityRenderer {
 		shader.setUsedFakeLight(texture.isUsedFakeLight());
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getID());
+		GL13.glActiveTexture(GL13.GL_TEXTURE1);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getNormalMapID());
 		shader.setShineVariables(texture.getShineDamper(), texture.getReflectivity());
 	}
 	
@@ -74,6 +80,7 @@ public class EntityRenderer {
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
 		GL20.glDisableVertexAttribArray(2);
+		GL20.glDisableVertexAttribArray(3);
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);
 	}

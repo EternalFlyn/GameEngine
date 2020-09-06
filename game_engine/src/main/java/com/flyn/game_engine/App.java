@@ -2,6 +2,8 @@ package com.flyn.game_engine;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -10,9 +12,10 @@ import javax.swing.JPanel;
 import com.flyn.game_engine.basic.Window;
 import com.flyn.game_engine.math.Matrix;
 import com.flyn.game_engine.math.Matrix4f;
-import com.flyn.game_engine.math.SimplexNoise2D;
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.math.Vector4f;
+import com.flyn.game_engine.misc.SimplexNoise2D;
+import com.flyn.game_engine.utils.FileUtils;
 
 public class App {
 
@@ -24,14 +27,23 @@ public class App {
 			window.showWindow();
 		}).start();
 		
-//		Matrix4f m = new Matrix4f();
-//		m.elements[0][0] = 0.8033333f;
-//		m.elements[1][1] = 1.428148f;
-//		m.elements[2][2] = -1.0001999f;
-//		m.elements[3][2] = -1.0f;
-//		m.elements[2][3] = -0.20002f;
-//		System.out.println(m);
-//		System.out.println(m.getDet());	
+//		int n = 1000000;
+//		int j = 0;
+//		long t1 , t2;
+//		
+//		t1 = System.nanoTime();
+//		for(int i = 0; i < n; i++) j++;
+//		System.out.println(j);
+//		t1 -= System.nanoTime();
+//		
+//		j = 0;
+//		t2 = System.nanoTime();
+//		for(int i = 0; i < n; i++) ++j;
+//		System.out.println(j);
+//		t2 -= System.nanoTime();
+//		
+//		System.out.printf("t1 : %,d t2 : %,d%n", -t1, -t2);
+
 		
 //		long t1 = 0;
 //		Random r = new Random();

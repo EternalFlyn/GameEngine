@@ -9,27 +9,35 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import com.flyn.game_engine.basic.RawModel;
+import com.flyn.game_engine.math.Matrix4f;
 public class TerrainRenderer {
 	
 	private TerrainShader shader;
 	
-	public TerrainRenderer(TerrainShader shader) {
+	public TerrainRenderer(TerrainShader shader, Matrix4f projection) {
 		this.shader = shader;
 		shader.enable();
 		shader.connectTextureUnit();
+		shader.setProjection(projection);
 		shader.disable();
 	}
 
 	public void render(ArrayList<Terrain> terrains) {
 		for(Terrain terrain : terrains) {
-			prepareTexturedModel(terrain);
+			prepareTerrainModel(terrain);
 			shader.setTransformation(terrain.getTransformationMatirx());
 			GL11.glDrawElements(GL11.GL_TRIANGLES, terrain.getModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-			unbindTexturedModel();
+			unbindTerrainModel();
 		}
 	}
 	
-	private void prepareTexturedModel(Terrain terrain) {
+	public void setProjectionMatrix(Matrix4f projection) {
+		shader.enable();
+		shader.setProjection(projection);
+		shader.disable();
+	}
+	
+	private void prepareTerrainModel(Terrain terrain) {
 		RawModel rawModel = terrain.getModel();
 		GL30.glBindVertexArray(rawModel.getVaoID());
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, rawModel.getIndicesID());
@@ -54,7 +62,7 @@ public class TerrainRenderer {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, terrain.getBlendMap().getID());
 	}
 	
-	private void unbindTexturedModel() {
+	private void unbindTerrainModel() {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);

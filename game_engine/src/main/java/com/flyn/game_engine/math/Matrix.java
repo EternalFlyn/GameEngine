@@ -11,7 +11,7 @@ public class Matrix {
 		elements = new float[row][column];
 	}
 	
-	public Matrix multiply(float scale) {
+	public Matrix scale(float scale) {
 		Matrix result = newMatrixObject(row, column);
 		for(int i = 0; i < row; i++) {
 			for(int j = 0; j < column; j++) {

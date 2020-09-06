@@ -100,7 +100,7 @@ public class Terrain {
 		float R = x < -1 || x > heights.length - 2 ? 0 : heights[x+1][z];
 		float B = z < 1 || z > heights[x].length ? 0 : heights[x][z-1];
 		float T = z < -1 || z > heights[x].length - 2 ? 0 : heights[x][z+1];
-		Vector3f normal = (Vector3f) new Vector3f(L - R, 2, B - T).normalise();
+		Vector3f normal = (Vector3f) new Vector3f(L - R, 2, B - T).normalize();
 		return normal;
 	}
 	

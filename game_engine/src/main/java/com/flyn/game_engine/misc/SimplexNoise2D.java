@@ -1,4 +1,4 @@
-package com.flyn.game_engine.math;
+package com.flyn.game_engine.misc;
 
 public class SimplexNoise2D {
 

@@ -32,7 +32,7 @@ public class MousePicker implements MouseMotionInterface {
 	private Vector3f toWorldCoordiate(Matrix4f view, Vector4f eyeCoordiate) {
 		Matrix4f invertedView = view.inverse();
 		Vector4f result = (Vector4f) invertedView.multiply(eyeCoordiate);
-		Vector3f ray = (Vector3f) new Vector3f(result.x(), result.y(), result.z()).normalise();
+		Vector3f ray = (Vector3f) new Vector3f(result.x(), result.y(), result.z()).normalize();
 		return ray;
 	}
 	

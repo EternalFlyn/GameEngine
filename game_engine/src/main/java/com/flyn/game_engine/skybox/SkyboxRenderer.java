@@ -31,10 +31,12 @@ public class SkyboxRenderer {
 			"src/main/java/texture/nightFront.png",
 	};
 	
-	private RawModel cube;
 	private int dayTexture, nightTexture;
 	
-	public SkyboxRenderer(SkyboxShader shader) {
+	private RawModel cube;
+	private SkyboxShader shader;
+	
+	public SkyboxRenderer(SkyboxShader shader, Matrix4f projection) {
 		float[] vertices = {        
 			    -SIZE,  SIZE, -SIZE,
 			    -SIZE, -SIZE, -SIZE,
@@ -81,8 +83,10 @@ public class SkyboxRenderer {
 		cube = Loader.loadToVAO(vertices, 3);
 		dayTexture = Loader.loadCubeMap(TEXTURE_FILES);
 		nightTexture = Loader.loadCubeMap(NIGHT_TEXTURE_FILES);
+		this.shader = shader;
 		shader.enable();
 		shader.connectTextureUnit();
+		shader.setProjection(projection);
 		shader.disable();
 	}
 	
@@ -93,6 +97,12 @@ public class SkyboxRenderer {
 		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, cube.getVertexCount());
 		GL20.glDisableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);
+	}
+	
+	public void setProjectionMatrix(Matrix4f projection) {
+		shader.enable();
+		shader.setProjection(projection);
+		shader.disable();
 	}
 	
 	private void bindTextures() {

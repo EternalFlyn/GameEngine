@@ -3,7 +3,7 @@ package com.flyn.game_engine.basic;
 public class Texture {
 
 	private boolean transparency = false, useFakeLight = false;
-	private int textureID, column = 1, row = 1;
+	private int textureID, normalMapID, column = 1, row = 1;
 	private float shineDamper = 1, reflectivity = 0;
 	
 	public Texture(int textureID) {
@@ -18,6 +18,14 @@ public class Texture {
 	
 	public int getID() {
 		return textureID;
+	}
+
+	public int getNormalMapID() {
+		return normalMapID;
+	}
+
+	public void setNormalMapID(int normalMapID) {
+		this.normalMapID = normalMapID;
 	}
 
 	public float getShineDamper() {

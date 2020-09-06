@@ -27,9 +27,9 @@ import com.flyn.game_engine.input.MouseMotionInput;
 import com.flyn.game_engine.input.WheelInput;
 import com.flyn.game_engine.input.WindowResizeInput;
 import com.flyn.game_engine.math.Matrix4f;
-import com.flyn.game_engine.math.Octree;
 import com.flyn.game_engine.math.Vector3f;
 import com.flyn.game_engine.math.Vector4f;
+import com.flyn.game_engine.misc.Octree;
 import com.flyn.game_engine.terrain.Terrain;
 import com.flyn.game_engine.utils.FileUtils;
 import com.flyn.game_engine.utils.Loader;
@@ -122,6 +122,12 @@ public class Window {
 //		Entity miku = new Entity(mikuModel, mikuTexture, new Vector3f(-2f, 0, -1), new Vector3f(0, 0, 0), 0.075f);
 //		renderer.addEntity(miku);
 		
+		Texture barrelTexture = new Texture(Loader.loadTexture("src/main/java/texture/barrel.png"));
+		barrelTexture.setNormalMapID(Loader.loadTexture("src/main/java/texture/barrelNormal.png"));
+		RawModel barrelModel = FileUtils.loadNormalMappingObjFile("src/main/java/model/barrel.obj");
+		Entity barrel = new Entity(barrelModel, barrelTexture, new Vector3f(5, 2, -2), new Vector3f(), 0.1f);
+		renderer.addNormalMappingEntity(barrel);
+		
 		for(int i = 0; i < 100; i++) {
 			Random ran = new Random();
 			float x = ran.nextFloat() * 20 - 10, z = ran.nextFloat() * 20 - 10;
@@ -148,8 +154,8 @@ public class Window {
 		waters.add(water3);
 		waters.add(water4);
 		
-		Vector4f reflectionPlane = new Vector4f((Vector3f) new Vector3f(0, 1, 0).normalise(), -1.1f);
-		Vector4f refractionPlane = new Vector4f((Vector3f) new Vector3f(0, -1, 0).normalise(), 1.1f);
+		Vector4f reflectionPlane = new Vector4f((Vector3f) new Vector3f(0, 1, 0).normalize(), -1f);
+		Vector4f refractionPlane = new Vector4f((Vector3f) new Vector3f(0, -1, 0).normalize(), 1f);
 		
 //		long tt = System.nanoTime();
 //		Octree o = FileUtils.test("src/main/java/model/dragon.obj");
@@ -166,6 +172,7 @@ public class Window {
 			}
 			
 			girl.rotate(0, 1, 0);
+			barrel.rotate(0, 1, 0);
 			player.move(terrain);
 			camera.move();
 			Matrix4f view = camera.createViewMatrix();
@@ -173,13 +180,14 @@ public class Window {
 			
 			GL11.glEnable(GL30.GL_CLIP_DISTANCE0);
 			fbos.bindReflectionFrameBuffer();
-			if(reflectionPlane.dot(new Vector4f(camera.getPosition(), 1)) < 0) reflectionPlane = (Vector4f) reflectionPlane.multiply(-1);
+			if(reflectionPlane.dot(new Vector4f(camera.getPosition(), 1)) < 0) reflectionPlane = (Vector4f) reflectionPlane.scale(-1);
 			Matrix4f mirrorView = camera.createReflectViewMatrix(reflectionPlane);
 			renderer.render(time, lights, mirrorView, reflectionPlane);
 			
 			fbos.bindRefractionFrameBuffer();
-			if(refractionPlane.dot(new Vector4f(camera.getPosition(), 1)) > 0) refractionPlane = (Vector4f) refractionPlane.multiply(-1);
+			if(refractionPlane.dot(new Vector4f(camera.getPosition(), 1)) > 0) refractionPlane = (Vector4f) refractionPlane.scale(-1);
 			renderer.render(time, lights, view, refractionPlane);
+
 			
 			GL11.glDisable(GL30.GL_CLIP_DISTANCE0);
 			fbos.unbindCurrentFrameBuffer();

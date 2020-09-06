@@ -9,16 +9,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 
 import com.flyn.game_engine.basic.RawModel;
-import com.flyn.game_engine.math.Octree;
+import com.flyn.game_engine.math.Matrix;
+import com.flyn.game_engine.math.Vector;
+import com.flyn.game_engine.math.Vector2f;
 import com.flyn.game_engine.math.Vector3f;
 
 public class FileUtils {
 	
-	private static HashMap<String, RawModel> models = new HashMap<>();
+	private static HashMap<String, RawModel> models = new HashMap<>(), normalMappingModels = new HashMap<>();
 
 	private FileUtils() {}
 
@@ -63,125 +66,208 @@ public class FileUtils {
 
 	public static RawModel loadObjFile(String filePath) {
 		if(models.containsKey(filePath)) return models.get(filePath);
-		HashSet<Integer> NumberList = new HashSet<>();
-		ArrayList<Float> verticesArray = new ArrayList<>();
-		ArrayList<Vector3f> texturesArray = new ArrayList<>(), normalsArray = new ArrayList<>();
+		HashMap<Vertex, Integer> verticesMap = new HashMap<>();
+		ArrayList<Vector3f> verticesArray = new ArrayList<>(), normalsArray = new ArrayList<>();
+		ArrayList<Vector2f> texturesArray = new ArrayList<>();
 		ArrayList<Integer> indeicsArray = new ArrayList<>();
-		float[] vertices = null, textures = null, normals = null;
-		int[] indices = null;
-		boolean inFaceData = false;
+		int vertexCount = 0;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(filePath));
 			String buffer;
 			while((buffer = reader.readLine()) != null) {
 				String[] data = buffer.replaceAll("  ", " ").split(" ");
 				switch(data[0]) {
+				case "f":
+					for(int i = 0; i < 3; i++) {
+						String[] faceData = data[i + 1].split("/");
+						Vertex v = new Vertex(Integer.parseInt(faceData[0]) - 1, Integer.parseInt(faceData[1]) - 1, Integer.parseInt(faceData[2]) - 1);
+						if(!verticesMap.containsKey(v)) verticesMap.put(v, vertexCount++);
+						indeicsArray.add(verticesMap.get(v));
+					}
+					break;
 				case "v":
-					verticesArray.add(Float.parseFloat(data[1]));
-					verticesArray.add(Float.parseFloat(data[2]));
-					verticesArray.add(Float.parseFloat(data[3]));
+					verticesArray.add(new Vector3f(Float.parseFloat(data[1]), Float.parseFloat(data[2]), Float.parseFloat(data[3])));
 					break;
 				case "vt":
-					texturesArray.add(new Vector3f(Float.parseFloat(data[1]), Float.parseFloat(data[2]), 0));
+					texturesArray.add(new Vector2f(Float.parseFloat(data[1]), Float.parseFloat(data[2])));
 					break;
 				case "vn":
 					normalsArray.add(new Vector3f(Float.parseFloat(data[1]), Float.parseFloat(data[2]), Float.parseFloat(data[3])));
 					break;
-				case "f":
-					if(!inFaceData) {
-						inFaceData = true;
-						int length = verticesArray.size();
-						vertices = new float[length];
-						textures = new float[(int) (2.0f / 3.0f * length)];
-						normals = new float[length];
-					}
-					for(int i = 0; i < 3; i++) {
-						String[] faceData = data[i + 1].split("/");
-						int vertexNumber = Integer.parseInt(faceData[0]) - 1;
-						indeicsArray.add(vertexNumber);
-						if(!NumberList.contains(vertexNumber)) {
-							NumberList.add(vertexNumber);
-							Vector3f textureVector = texturesArray.get(Integer.parseInt(faceData[1]) - 1);
-							textures[vertexNumber * 2] = textureVector.x();
-							textures[vertexNumber * 2 + 1] = 1 - textureVector.y();
-							Vector3f normalVector = normalsArray.get(Integer.parseInt(faceData[2]) - 1);
-							normals[vertexNumber * 3] = normalVector.x();
-							normals[vertexNumber * 3 + 1] = normalVector.y();
-							normals[vertexNumber * 3 + 2] = normalVector.z();
-						}
-					}
 				}
 			}
 			reader.close();
-			Iterator<Float> iter = verticesArray.iterator();
-			for(int i = 0; i < vertices.length; i++) vertices[i] = iter.next();
-			indices = indeicsArray.stream().mapToInt(i -> i).toArray();
-		} catch (NumberFormatException | IOException e) {
+		} catch (IOException e) {
 			System.err.println("Couldn't find the file : " + filePath);
 			e.printStackTrace();
+		} catch (NumberFormatException e) {
+			System.err.println("Value format error." + filePath);
+			e.printStackTrace();
+		}
+		int[] indices = indeicsArray.stream().mapToInt(i -> i).toArray();
+		float[] vertices = new float[verticesMap.size() * 3], textures = new float[verticesMap.size() * 2], normals = new float[verticesMap.size() * 3];
+		Iterator<Entry<Vertex, Integer>> vertexIter = verticesMap.entrySet().iterator();
+		while(vertexIter.hasNext()) {
+			Entry<Vertex, Integer> e = vertexIter.next();
+			Vertex v = e.getKey();
+			int index = e.getValue();
+			vertices[index * 3] = verticesArray.get(v.vertexIndex).x();
+			vertices[index * 3 + 1] = verticesArray.get(v.vertexIndex).y();
+			vertices[index * 3 + 2] = verticesArray.get(v.vertexIndex).z();
+			textures[index * 2] = texturesArray.get(v.textureIndex).x();
+			textures[index * 2 + 1] = 1 - texturesArray.get(v.textureIndex).y();
+			normals[index * 3] = normalsArray.get(v.normalIndex).x();
+			normals[index * 3 + 1] = normalsArray.get(v.normalIndex).y();
+			normals[index * 3 + 2] = normalsArray.get(v.normalIndex).z();
 		}
 		RawModel model = Loader.loadToVAO(indices, vertices, textures, normals);
 		models.put(filePath, model);
 		return model;
 	}
 	
-	public static Octree test(String filePath) {
-		HashSet<Integer> NumberList = new HashSet<>();
-		ArrayList<Float> verticesArray = new ArrayList<>();
-		ArrayList<Vector3f> texturesArray = new ArrayList<>(), normalsArray = new ArrayList<>();
+	public static RawModel loadNormalMappingObjFile(String filePath) {
+		if(normalMappingModels.containsKey(filePath)) return normalMappingModels.get(filePath);
+		ArrayList<Vertex> verticesInfo = new ArrayList<>();
+		ArrayList<Vector3f> verticesArray = new ArrayList<>(), normalsArray = new ArrayList<>();
+		ArrayList<Vector2f> texturesArray = new ArrayList<>();
 		ArrayList<Integer> indeicsArray = new ArrayList<>();
-		float[] vertices = null, textures = null, normals = null;
-		boolean inFaceData = false;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(filePath));
 			String buffer;
 			while((buffer = reader.readLine()) != null) {
 				String[] data = buffer.replaceAll("  ", " ").split(" ");
 				switch(data[0]) {
+				case "f":
+					Vertex[] vs = new Vertex[3];
+					for(int i = 0; i < 3; i++) {
+						String[] faceData = data[i + 1].split("/");
+						Vertex v = new Vertex(Integer.parseInt(faceData[0]) - 1, Integer.parseInt(faceData[1]) - 1, Integer.parseInt(faceData[2]) - 1);
+						int vertexNo = 0;
+						if(verticesInfo.contains(v)) {
+							vertexNo = verticesInfo.indexOf(v);
+							vs[i] = verticesInfo.get(vertexNo);
+						}
+						else {
+							vertexNo = verticesInfo.size();
+							vs[i] = v;
+							verticesInfo.add(v);
+						}
+						indeicsArray.add(vertexNo);
+					}
+					calculateTangents(verticesArray, texturesArray, vs);
+					break;
 				case "v":
-					verticesArray.add(Float.parseFloat(data[1]));
-					verticesArray.add(Float.parseFloat(data[2]));
-					verticesArray.add(Float.parseFloat(data[3]));
+					verticesArray.add(new Vector3f(Float.parseFloat(data[1]), Float.parseFloat(data[2]), Float.parseFloat(data[3])));
 					break;
 				case "vt":
-					texturesArray.add(new Vector3f(Float.parseFloat(data[1]), Float.parseFloat(data[2]), 0));
+					texturesArray.add(new Vector2f(Float.parseFloat(data[1]), Float.parseFloat(data[2])));
 					break;
 				case "vn":
 					normalsArray.add(new Vector3f(Float.parseFloat(data[1]), Float.parseFloat(data[2]), Float.parseFloat(data[3])));
 					break;
-				case "f":
-					if(!inFaceData) {
-						inFaceData = true;
-						int length = verticesArray.size();
-						vertices = new float[length];
-						textures = new float[(int) (2.0f / 3.0f * length)];
-						normals = new float[length];
-					}
-					for(int i = 0; i < 3; i++) {
-						String[] faceData = data[i + 1].split("/");
-						int vertexNumber = Integer.parseInt(faceData[0]) - 1;
-						indeicsArray.add(vertexNumber);
-						if(!NumberList.contains(vertexNumber)) {
-							NumberList.add(vertexNumber);
-							Vector3f textureVector = texturesArray.get(Integer.parseInt(faceData[1]) - 1);
-							textures[vertexNumber * 2] = textureVector.x();
-							textures[vertexNumber * 2 + 1] = 1 - textureVector.y();
-							Vector3f normalVector = normalsArray.get(Integer.parseInt(faceData[2]) - 1);
-							normals[vertexNumber * 3] = normalVector.x();
-							normals[vertexNumber * 3 + 1] = normalVector.y();
-							normals[vertexNumber * 3 + 2] = normalVector.z();
-						}
-					}
 				}
 			}
 			reader.close();
-			Iterator<Float> iter = verticesArray.iterator();
-			for(int i = 0; i < vertices.length; i++) vertices[i] = iter.next();
-		} catch (NumberFormatException | IOException e) {
+		} catch (IOException e) {
 			System.err.println("Couldn't find the file : " + filePath);
 			e.printStackTrace();
+		} catch (NumberFormatException e) {
+			System.err.println("Value format error." + filePath);
+			e.printStackTrace();
 		}
-		return new Octree(vertices.length / 3, vertices);
+		int[] indicesData = indeicsArray.stream().mapToInt(i -> i).toArray();
+		float[] verticesData = new float[verticesInfo.size() * 3];
+		float[] texturesData = new float[verticesInfo.size() * 2];
+		float[] normalsData = new float[verticesInfo.size() * 3];
+		float[] tangentsData = new float[verticesInfo.size() * 3];
+		for(int i = 0; i < verticesInfo.size(); i++) {
+			Vertex v = verticesInfo.get(i);
+			verticesData[i * 3] = verticesArray.get(v.vertexIndex).x();
+			verticesData[i * 3 + 1] = verticesArray.get(v.vertexIndex).y();
+			verticesData[i * 3 + 2] = verticesArray.get(v.vertexIndex).z();
+			texturesData[i * 2] = texturesArray.get(v.textureIndex).x();
+			texturesData[i * 2 + 1] = 1 - texturesArray.get(v.textureIndex).y();
+			normalsData[i * 3] = normalsArray.get(v.normalIndex).x();
+			normalsData[i * 3 + 1] = normalsArray.get(v.normalIndex).y();
+			normalsData[i * 3 + 2] = normalsArray.get(v.normalIndex).z();
+			Vector3f tangent = v.getTangent();
+			tangentsData[i * 3] = tangent.x();
+			tangentsData[i * 3 + 1] = tangent.y();
+			tangentsData[i * 3 + 2] = tangent.z();
+		}
+		RawModel model = Loader.loadToVAO(indicesData, verticesData, texturesData, normalsData, tangentsData);
+		normalMappingModels.put(filePath, model);
+		return model;
+	}
+	
+	private static boolean flag  = false;
+	private static void calculateTangents(ArrayList<Vector3f> vertices, ArrayList<Vector2f> textures, Vertex[] index) {
+		Vector3f[] vs = new Vector3f[3];
+		for(int i = 0; i < 3; i++) vs[i] = vertices.get(index[i].vertexIndex);
+		Vector3f deltaPos1 = (Vector3f) vs[1].minus(vs[0]);
+		Vector3f deltaPos2 = (Vector3f) vs[2].minus(vs[0]);
+		
+		Vector2f[] uv = new Vector2f[3];
+		for(int i = 0; i < 3; i++) uv[i] = textures.get(index[i].textureIndex);
+		Vector2f deltaUv1 = (Vector2f) uv[1].minus(uv[0]);
+		Vector2f deltaUv2 = (Vector2f) uv[2].minus(uv[0]);
+
+		float r = 1 / (deltaUv1.x() * deltaUv2.y() - deltaUv1.y() * deltaUv2.x());
+		deltaPos1.scale(deltaUv2.y());
+		deltaPos2.scale(deltaUv1.y());
+		Vector3f tangent = (Vector3f) deltaPos1.minus(deltaPos2);
+		tangent.scale(r);
+		
+		for(Vertex v : index) v.addTangent(tangent);
+		
+		if(!flag) {
+			flag = true;
+			for(Vector3f v : vs) System.out.printf("v : %s%n", v.toString());
+			System.out.printf("p1 : %s%n", deltaPos1.toString());
+			System.out.printf("p2 : %s%n", deltaPos2.toString());
+			for(Vector2f v : uv) System.out.printf("v : %s%n", v.toString());
+			System.out.printf("uv1 : %s%n", deltaUv1.toString());
+			System.out.printf("uv2 : %s%n", deltaUv2.toString());
+			
+		}
+	}
+	
+	private static class Vertex {
+		
+		int vertexIndex, textureIndex, normalIndex;
+		Vector3f tangent = new Vector3f();
+		
+		public Vertex(int vertexIndex, int textureIndex, int normalIndex) {
+			this.vertexIndex = vertexIndex;
+			this.textureIndex = textureIndex;
+			this.normalIndex = normalIndex;
+		}
+		
+		public void addTangent(Vector3f tangent) {
+			this.tangent = (Vector3f) this.tangent.plus(tangent);
+		}
+		
+		public Vector3f getTangent() {
+			return (Vector3f) tangent.normalize();
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof Vertex) {
+				Vertex o = (Vertex) obj;
+				return vertexIndex == o.vertexIndex && textureIndex == o.textureIndex && normalIndex == o.normalIndex;
+			}
+			return false;
+		}
+		
+		@Override
+		public int hashCode() {
+			int hash = vertexIndex;
+			hash = 31 * hash + textureIndex;
+			hash = 31 * hash + normalIndex;
+			return hash;
+		}
+		
 	}
 
 }

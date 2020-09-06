@@ -9,12 +9,14 @@ import org.lwjgl.opengl.GL11;
 import com.flyn.game_engine.entity.Entity;
 import com.flyn.game_engine.entity.EntityRenderer;
 import com.flyn.game_engine.entity.EntityShader;
+import com.flyn.game_engine.entity.NormalMappingRenderer;
+import com.flyn.game_engine.entity.NormalMappingShader;
 import com.flyn.game_engine.input.WindowResizeInput;
 import com.flyn.game_engine.math.Matrix4f;
-import com.flyn.game_engine.math.Octree;
-import com.flyn.game_engine.math.OctreeRenderer;
-import com.flyn.game_engine.math.OctreeShader;
 import com.flyn.game_engine.math.Vector4f;
+import com.flyn.game_engine.misc.Octree;
+import com.flyn.game_engine.misc.OctreeRenderer;
+import com.flyn.game_engine.misc.OctreeShader;
 import com.flyn.game_engine.skybox.SkyboxRenderer;
 import com.flyn.game_engine.skybox.SkyboxShader;
 import com.flyn.game_engine.terrain.Terrain;
@@ -37,6 +39,9 @@ public class MasterRenderer {
 	private EntityShader entityShader = new EntityShader();
 	private EntityRenderer entityRenderer;
 	
+	private NormalMappingShader normalMappingShader = new NormalMappingShader();
+	private NormalMappingRenderer normalMappingRenderer;
+	
 	private TerrainShader terrainShader = new TerrainShader();
 	private TerrainRenderer terrainRenderer;
 	
@@ -46,17 +51,20 @@ public class MasterRenderer {
 	private OctreeShader octreeShader = new OctreeShader();
 	private OctreeRenderer octreeRenderer;
 	
-	private HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities = new HashMap<>();
+	private HashMap<RawModel, HashMap<Texture, ArrayList<Entity>>> entities = new HashMap<>(), normalMappingEntites = new HashMap<>();
 	private ArrayList<Terrain> terrains = new ArrayList<>();
 	private ArrayList<Octree> tree = new ArrayList<>();
 	
 	public MasterRenderer(long window) {
 		enableCulling();
 		this.window = window;
-		sizeCheck();
-		entityRenderer = new EntityRenderer(entityShader);
-		terrainRenderer = new TerrainRenderer(terrainShader);
-		skyboxRenderer = new SkyboxRenderer(skyboxShader);
+		int[] size = WindowResizeInput.getSize(window);
+		aspectRatio = (float) size[0] / (float) size[1];
+		createProjectionMatrix();
+		entityRenderer = new EntityRenderer(entityShader, projectionMatrix);
+		normalMappingRenderer = new NormalMappingRenderer(normalMappingShader, projectionMatrix);
+		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
+		skyboxRenderer = new SkyboxRenderer(skyboxShader, projectionMatrix);
 		octreeRenderer = new OctreeRenderer();
 	}
 	
@@ -81,6 +89,14 @@ public class MasterRenderer {
 		entityRenderer.render(entities);
 		entityShader.disable();
 		
+		normalMappingShader.enable();
+		normalMappingShader.setViewPosition(view);
+		normalMappingShader.setLight(lights, view);
+		normalMappingShader.setSkyColor(skyColor);
+		normalMappingShader.setClipPlane(clipPlane);
+		normalMappingRenderer.render(normalMappingEntites);
+		normalMappingShader.disable();
+		
 		terrainShader.enable();
 		terrainShader.setViewPosition(view);
 		terrainShader.setLight(lights);
@@ -89,6 +105,7 @@ public class MasterRenderer {
 		terrainRenderer.render(terrains);
 		terrainShader.disable();
 		
+		disableCulling();
 		skyboxShader.enable();
 		Matrix4f followView = new Matrix4f();
 		followView.fill(view);
@@ -101,6 +118,7 @@ public class MasterRenderer {
 		skyboxShader.setBlendFactor(dayNightSystem(time));
 		skyboxRenderer.render();
 		skyboxShader.disable();
+		enableCulling();
 		
 		octreeShader.enable();
 		octreeShader.setViewPosition(view);
@@ -139,6 +157,29 @@ public class MasterRenderer {
 		list.add(entity);
 	}
 	
+	public void addNormalMappingEntity(Entity entity) {
+		RawModel model = entity.getModel();
+		Texture texture = entity.getTexture();
+		ArrayList<Entity> list;
+		if(normalMappingEntites.containsKey(model)) {
+			HashMap<Texture, ArrayList<Entity>> textureMap = normalMappingEntites.get(model);
+			if(textureMap.containsKey(texture)) {
+				list = normalMappingEntites.get(model).get(texture);
+			}
+			else {
+				list = new ArrayList<>();
+				textureMap.put(texture, list);
+			}
+		}
+		else {
+			HashMap<Texture, ArrayList<Entity>> textureMap = new HashMap<>();
+			list = new ArrayList<>();
+			textureMap.put(texture, list);
+			normalMappingEntites.put(model, textureMap);
+		}
+		list.add(entity);
+	}
+	
 	public void prepare() {
 		GL11.glClearColor(skyColor.getRed() / 255f, skyColor.getGreen() / 255f, skyColor.getBlue() / 255f, skyColor.getAlpha() / 255f);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -165,7 +206,7 @@ public class MasterRenderer {
 		int[] size = WindowResizeInput.getSize(window);
 		float newAspectRatio = (float) size[0] / (float) size[1];
 		if(aspectRatio != newAspectRatio) {
-			aspectRatio = (float) size[0] / (float) size[1];
+			aspectRatio = newAspectRatio;
 			createProjectionMatrix();
 			GL11.glViewport(0, 0, size[0], size[1]);
 			setProjectionMatrix();
@@ -173,17 +214,9 @@ public class MasterRenderer {
 	}
 	
 	private void setProjectionMatrix() {
-		entityShader.enable();
-		entityShader.setProjection(projectionMatrix);
-		entityShader.disable();
-		
-		terrainShader.enable();
-		terrainShader.setProjection(projectionMatrix);
-		terrainShader.disable();
-		
-		skyboxShader.enable();
-		skyboxShader.setProjection(projectionMatrix);
-		skyboxShader.disable();
+		entityRenderer.setProjectionMatrix(projectionMatrix);
+		terrainRenderer.setProjectionMatrix(projectionMatrix);
+		skyboxRenderer.setProjectionMatrix(projectionMatrix);
 		
 		octreeShader.enable();
 		octreeShader.setProjection(projectionMatrix);

@@ -1,9 +1,10 @@
-package com.flyn.game_engine.math;
+package com.flyn.game_engine.misc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.flyn.game_engine.entity.object.Box;
+import com.flyn.game_engine.math.Vector3f;
 
 public class Octree {
 
