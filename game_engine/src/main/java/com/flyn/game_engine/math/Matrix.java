@@ -103,6 +103,36 @@ public class Matrix {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		if(super.equals(obj)) return true;
+		if(obj instanceof Matrix) {
+			Matrix m = (Matrix) obj;
+			if(m.getClass() == this.getClass()) {
+				if(row == m.row && column == m.column) {
+					for(int i = 0; i < row; i++) {
+						for(int j = 0; j < column; j++) {
+							if(elements[i][j] != m.elements[i][j]) return false;
+						}
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		int hash = 0;
+		for(int i = 0; i < row; i++) {
+			for(int j = 0; j < column; j++) {
+				hash = (int) (31 * hash + elements[i][j]);
+			}
+		}
+		return super.hashCode();
+	}
+	
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(super.toString()).append("\n");
 		for(int i = 0; i < row; i++) {
