@@ -45,14 +45,16 @@ public class FontGenerator {
 		if(metrics.containsKey(fontName + fontType)) m = metrics.get(fontName + fontType);
 		else m = creatFontMetrics(fontName, fontType);
 		int w = m.charWidth(character), h = m.getHeight();
-		BufferedImage image = new BufferedImage(m.charWidth(character), m.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		BufferedImage image = null;
+		if(w > 0) {
+		image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = image.createGraphics();
-		g.setPaint(Color.BLACK);
-		g.drawRect(0, 0, w-1, h-1);
+		g.setPaint(Color.WHITE);
 		g.setFont(m.getFont());
 		g.drawString(String.valueOf(character), 0, m.getAscent());
 		g.dispose();
-		Glyph result = new Glyph(image);
+		}
+		Glyph result = new Glyph(image, w, h);
 		fonts.put(key, result);
 		return result;
 	}

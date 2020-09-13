@@ -24,5 +24,14 @@ public class Vector2f extends Vector {
 		elements[0][0] = x;
 		elements[1][0] = y;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Vector2f) {
+			Vector2f v = (Vector2f) obj;
+			return elements[0][0] == v.elements[0][0] && elements[1][0] == v.elements[1][0];
+		}
+		return false;
+	}
 
 }

@@ -1,7 +1,5 @@
 package com.flyn.game_engine.gui;
 
-import org.lwjgl.glfw.GLFW;
-
 import com.flyn.game_engine.math.Matrix4f;
 import com.flyn.game_engine.math.Vector3f;
 
@@ -22,7 +20,7 @@ public class GuiTexture {
 		return textureID;
 	}
 	
-	public Matrix4f getTransformationMatirx(long window) {
+	public Matrix4f getTransformationMatrix() {
 		Matrix4f translate = Matrix4f.translate(new Vector3f(2 * x - 1, -2 * y + 1, 0));
 		Matrix4f scale = Matrix4f.zoom(w, h, 0);
 		return (Matrix4f) translate.multiply(scale);

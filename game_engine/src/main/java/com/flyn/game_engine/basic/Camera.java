@@ -61,7 +61,7 @@ public class Camera implements MouseMotionInterface, WheelInterface {
 	public void wheelScroll(int x, int y) {
 		distanceFromPlayer -= y * 0.1f;
 		if(distanceFromPlayer < 0.5f) distanceFromPlayer = 0.5f;
-		else if(distanceFromPlayer > 2) distanceFromPlayer = 2;
+		else if(distanceFromPlayer > 3) distanceFromPlayer = 3;
 	}
 
 	@Override

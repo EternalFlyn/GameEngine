@@ -19,6 +19,8 @@ import com.flyn.game_engine.entity.object.Player;
 import com.flyn.game_engine.entity.object.Poppy;
 import com.flyn.game_engine.entity.object.Stall;
 import com.flyn.game_engine.entity.object.Torch;
+import com.flyn.game_engine.font.Text;
+import com.flyn.game_engine.font.TextRenderer;
 import com.flyn.game_engine.gui.GuiRenderer;
 import com.flyn.game_engine.gui.GuiTexture;
 import com.flyn.game_engine.input.KeyInput;
@@ -86,7 +88,12 @@ public class Window {
 		
 		startedTime = System.currentTimeMillis();
 		MasterRenderer renderer = new MasterRenderer(window);
-		GuiRenderer gui = new GuiRenderer(window);
+		GuiRenderer gui = new GuiRenderer();
+		TextRenderer text = new TextRenderer(window);
+		ArrayList<Text> texts = new ArrayList<>();
+		Text a = new Text("Text test!!", 0f, 0.25f);
+		a.setScale(0.75f);
+		texts.add(a);
 		
 		MousePicker picker = new MousePicker(window, renderer.getProjectionMatrix());
 		
@@ -101,7 +108,7 @@ public class Window {
 		lights.add(new Light(new Vector3f(1, 1, 1), new Vector3f(Color.red), new Vector3f(1, 0.1f, 0.02f)));
 		lights.add(new Light(new Vector3f(1, 1, -1), new Vector3f(Color.green), new Vector3f(1, 0.1f, 0.02f)));
 		lights.add(new Light(new Vector3f(-1, 1, -1), new Vector3f(Color.blue), new Vector3f(1, 0.1f, 0.02f)));
-
+		
 		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/64695689_p0.jpg"), 0.82f, 0, 0.18f, 0.32f));
 		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/re_zero_rem.jpg"), 0.82f, 0.32f, 0.18f, 0.24f));
 		guis.add(new GuiTexture(Loader.loadTexture("src/main/java/texture/icon_navigation_bar.png"), 0, 0, 0.045f, 0.08f));
@@ -131,13 +138,13 @@ public class Window {
 		for(int i = 0; i < 100; i++) {
 			Random ran = new Random();
 			float x = ran.nextFloat() * 20 - 10, z = ran.nextFloat() * 20 - 10;
-			renderer.addEntity(new Poppy(new Vector3f(x, terrain.getHeight(x, z), z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)));
+			renderer.addEntity(new Poppy(new Vector3f(x, Terrain.getHeight(x, z), z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)));
 		}
 
 		for(int i = 0; i < 100; i++) {
 			Random ran = new Random();
 			float x = ran.nextFloat() * 20 - 10, z = ran.nextFloat() * 20 - 10;
-			renderer.addEntity(new Torch(new Vector3f(x, terrain.getHeight(x, z), z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)));
+			renderer.addEntity(new Torch(new Vector3f(x, Terrain.getHeight(x, z), z), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)));
 		}
 		
 		WaterFrameBuffers fbos = new WaterFrameBuffers(window);
@@ -173,7 +180,7 @@ public class Window {
 			
 			girl.rotate(0, 1, 0);
 			barrel.rotate(0, 1, 0);
-			player.move(terrain);
+			player.move();
 			camera.move();
 			Matrix4f view = camera.createViewMatrix();
 //			System.out.println(picker.getCurrentRay(camera.createViewMatrix()));
@@ -196,6 +203,7 @@ public class Window {
 			waterRenderer.render(waters, camera, sun);
 			
 			gui.render(guis);
+			text.render(texts);
 			glfwSwapBuffers(window);
 //			System.out.println("FPS:" + 1 / getFrameTimeSeconds());
 		}
@@ -203,6 +211,7 @@ public class Window {
 		renderer.remove();
 		waterRenderer.remove();
 		gui.remove();
+		text.remove();
 		Loader.clean();
 		glfwTerminate();
 	}

@@ -104,7 +104,6 @@ public class Matrix {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if(super.equals(obj)) return true;
 		if(obj instanceof Matrix) {
 			Matrix m = (Matrix) obj;
 			if(m.getClass() == this.getClass()) {
@@ -129,7 +128,7 @@ public class Matrix {
 				hash = (int) (31 * hash + elements[i][j]);
 			}
 		}
-		return super.hashCode();
+		return hash;
 	}
 	
 	@Override

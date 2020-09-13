@@ -14,7 +14,7 @@ public class Entity {
 	private RawModel model;
 	private Texture texture;
 	private Vector3f position, rotation, scale;
-	private Matrix4f transformationMatirx;
+	private Matrix4f transformationMatrix;
 	
 	public Entity(RawModel model, Texture texture, Vector3f position, Vector3f rotation, Vector3f scale) {
 		this.model = model;
@@ -61,7 +61,7 @@ public class Entity {
 		Matrix4f translate = Matrix4f.translate(position);
 		Matrix4f rotation = Matrix4f.rotate(this.rotation.x(), this.rotation.y(), this.rotation.z());
 		Matrix4f scale = Matrix4f.zoom(this.scale.x(), this.scale.y(), this.scale.z());
-		transformationMatirx = (Matrix4f) translate.multiply(scale).multiply(rotation);
+		transformationMatrix = (Matrix4f) translate.multiply(scale).multiply(rotation);
 	}
 
 	public Vector3f getPosition() {
@@ -119,7 +119,7 @@ public class Entity {
 	}
 
 	public Matrix4f getTransformationMatirx() {
-		return transformationMatirx;
+		return transformationMatrix;
 	}
 	
 }

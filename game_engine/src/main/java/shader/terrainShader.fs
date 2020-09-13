@@ -23,8 +23,8 @@ uniform float reflectivity;
 
 void main(void) {
 
-	vec4 blendMapColor = texture(blendMap, coords * 4);
-	vec2 tiledCoords = coords * 4096;
+	vec4 blendMapColor = texture(blendMap, coords);
+	vec2 tiledCoords = coords * 1024;
 	float backgroundAmount = 1 - (blendMapColor.r + blendMapColor.g + blendMapColor.b);
 	vec4 backgroundColor = vec4(grassColor, 1) * texture(backgroundTexture, tiledCoords) * backgroundAmount;
 	vec4 rTextureColor = texture(rTexture, tiledCoords) * blendMapColor.r;

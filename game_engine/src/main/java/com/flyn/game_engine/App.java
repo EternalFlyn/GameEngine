@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -31,27 +32,32 @@ public class App {
 	private static Window window = new Window();
 
 	public static void main(String[] args) {
-//		new Thread(() -> {
-//			window.setWindow("Test", 1280, 720);
-//			window.showWindow();
-//		}).start();
+		new Thread(() -> {
+			window.setWindow("Test", 1280, 720);
+			window.showWindow();
+		}).start();
 		
-		new TestFrame();
+//		new TestFrame();
 		
-		PerlinNoise pn = new PerlinNoise();
-		long t1 , t2;
-		
-		t1 = System.nanoTime();
-		pn.getPerlinNoise(100, 300);
-		t1 -= System.nanoTime();
-
-		t2 = System.nanoTime();
-		pn.getPerlinNoise(100, 300);
-		t2 -= System.nanoTime();
-		
-		System.out.printf("t1 : %,d t2 : %,d%n", -t1, -t2);
-
-		
+//		PerlinNoise pn = new PerlinNoise();
+//		pn.getPerlinNoise(0, 0);
+//		long t1 , t2;
+//		
+//		t1 = System.nanoTime();
+//		pn.getPerlinNoise(100, 300);
+//		t1 -= System.nanoTime();
+//
+//		t2 = System.nanoTime();
+//		pn.getPerlinNoise(100, 300);
+//		t2 -= System.nanoTime();
+//		
+//		System.out.printf("t1 : %,d t2 : %,d%n", -t1, -t2);
+//
+//		t1 = System.nanoTime();
+//		for(int i = 0; i < 10000; i++) pn.getPerlinNoise(100, 300);
+//		t1 -= System.nanoTime();
+//		
+//		System.out.printf("t1 : %,4f", -t1 / 10000.0f);
 //		long t1 = 0;
 //		Random r = new Random();
 //		int times = 1000000;
@@ -87,7 +93,7 @@ public class App {
 		private BufferedImage simplexNoise = new BufferedImage(noiseSize, noiseSize, BufferedImage.TYPE_INT_ARGB);
 		private BufferedImage whiteNoise = new BufferedImage(noiseSize, noiseSize, BufferedImage.TYPE_INT_ARGB);
 		private BufferedImage perlinNoise = new BufferedImage(noiseSize, noiseSize, BufferedImage.TYPE_INT_ARGB);
-		private BufferedImage perlinNoise2x = new BufferedImage(noiseSize, noiseSize, BufferedImage.TYPE_INT_ARGB);
+		private BufferedImage fractalNoise = new BufferedImage(noiseSize, noiseSize, BufferedImage.TYPE_INT_ARGB);
 		private Font f;
 		
 		public TestFrame() {
@@ -133,7 +139,7 @@ public class App {
 					}
 					if(pixel > 1) pixel = 1;
 					else if(pixel < -1) pixel = -1;
-					perlinNoise2x.setRGB(i, j, getColor(pixel));
+					fractalNoise.setRGB(i, j, getColor(pixel));
 				}
 			}
 		}
@@ -166,7 +172,7 @@ public class App {
 			g.drawImage(simplexNoise, 0, 0, null);
 			g.drawImage(whiteNoise, 0 + noiseSize * 1, 0, null);
 			g.drawImage(perlinNoise, 0 + noiseSize * 2, 0, null);
-			g.drawImage(perlinNoise2x, 0 + noiseSize * 3, 0, null);
+			g.drawImage(fractalNoise, 0 + noiseSize * 3, 0, null);
 		}
 	}
 	

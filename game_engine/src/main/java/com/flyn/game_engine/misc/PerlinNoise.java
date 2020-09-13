@@ -1,7 +1,5 @@
 package com.flyn.game_engine.misc;
 
-import java.util.HashMap;
-
 import com.flyn.game_engine.math.Vector2f;
 
 public class PerlinNoise {
@@ -30,7 +28,6 @@ public class PerlinNoise {
 	}
 	
 	private long seed = 0;
-	private HashMap<Vector2f, Float> values = new HashMap<>();
 	
 	private static int fastFloor(float f) {
 		return (f >= 0 ? (int) f : (int) f - 1);
@@ -60,17 +57,14 @@ public class PerlinNoise {
 	}
 	
 	public float getPerlinNoise(float x, float y) {
-		Vector2f key = new Vector2f(x, y);
-		if(values.containsKey(key)) return values.get(key);		
 		int x0 = fastFloor(x), y0 = fastFloor(y), x1 = x0 + 1, y1 = y0 + 1;
 		Vector2f o = new Vector2f(x, y), d[] = new Vector2f[4];
 		float[] g = new float[4];
 		for(int i = 0; i < 4; i++) d[i] = (Vector2f) o.minus(new Vector2f(i % 2 == 0 ? x0 : x1, i / 2 == 0 ? y0 : y1));
 		for(int i = 0; i < 4; i++) g[i] = getGradient(i % 2 == 0 ? x0 : x1, i / 2 == 0 ? y0 : y1).dot(d[i]);
 		float sx = easeCurve(x, x0), sy = easeCurve(y, y0);
-		float a = lerp(g[0], g[1], sx), b = lerp(g[2], g[3], sx), result = lerp(a, b, sy);
-		values.put(key, result);
-		return result;
+		float a = lerp(g[0], g[1], sx), b = lerp(g[2], g[3], sx);
+		return lerp(a, b, sy);
 	}
 	
 	private Vector2f getGradient(int x, int y) {
