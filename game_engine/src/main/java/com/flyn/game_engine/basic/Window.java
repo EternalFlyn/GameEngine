@@ -91,9 +91,10 @@ public class Window {
 		GuiRenderer gui = new GuiRenderer();
 		TextRenderer text = new TextRenderer(window);
 		ArrayList<Text> texts = new ArrayList<>();
-		Text a = new Text("Text test!!", 0f, 0.25f);
-		a.setScale(0.75f);
-		texts.add(a);
+		Text testText = new Text("Text test!!", 0f, 0.25f);
+		testText.setTextColor(Color.RED);
+		testText.setScale(0.75f);
+		texts.add(testText);
 		
 		MousePicker picker = new MousePicker(window, renderer.getProjectionMatrix());
 		

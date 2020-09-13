@@ -1,5 +1,6 @@
 package com.flyn.game_engine.font;
 
+import java.awt.Color;
 import java.awt.Font;
 
 import com.flyn.game_engine.math.Matrix4f;
@@ -10,6 +11,7 @@ public class Text {
 	private float x, y, size = 1;
 	private String fontName = "Naikai", text;
 	private int fontType = Font.PLAIN;
+	private Color textColor = Color.WHITE;
 	private Matrix4f transformationMatrix;
 	
 	static {
@@ -57,5 +59,13 @@ public class Text {
 	public void setFontType(int fontType) {
 		this.fontType = fontType;
 	}
-	
+
+	public Color getTextColor() {
+		return textColor;
+	}
+
+	public void setTextColor(Color textColor) {
+		this.textColor = textColor;
+	}
+		
 }

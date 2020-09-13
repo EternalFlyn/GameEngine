@@ -46,6 +46,7 @@ public class TextRenderer {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0);
 			Matrix4f mainTransformation = text.getTransformationMatrix();
 			float offsetX = 0, offsetY = 0;
+			shader.setTextColor(text.getTextColor());
 			for(Glyph g : FontGenerator.getGlyphs(text.getFontName(), text.getFontType(), text.getText())) {
 				if(g.getWidth() == 0) {
 					offsetX = 0;
