@@ -8,5 +8,5 @@ uniform sampler2D textureSampler;
 uniform vec3 textColor;
 
 void main(void) {
-	pixelColor = vec4(textColor, 1) * texture(textureSampler, coords);
+	pixelColor = vec4(textColor, texture(textureSampler, coords).a);
 }

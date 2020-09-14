@@ -1,6 +1,5 @@
 package com.flyn.game_engine.font;
 
-import java.awt.Font;
 import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL11;
@@ -45,20 +44,46 @@ public class TextRenderer {
 		for(Text text : texts) {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0);
 			Matrix4f mainTransformation = text.getTransformationMatrix();
-			float offsetX = 0, offsetY = 0;
 			shader.setTextColor(text.getTextColor());
-			for(Glyph g : FontGenerator.getGlyphs(text.getFontName(), text.getFontType(), text.getText())) {
-				if(g.getWidth() == 0) {
-					offsetX = 0;
-					offsetY -= 2 * g.getHeight() / (float) size[1];
-					continue;
+			float offsetY = 0;
+			float lineHeight = 2 * text.getTextHeight() / (float) size[1];
+			float displayLength = 2 * text.getMaxTextLength() / text.getScale();
+			for(Glyph[] glyphs : text.getText()) {
+				float offsetX = 0;
+				if(text.alignment > 0) {
+					float textLength = 0;
+					for(Glyph g : glyphs) {
+						float textWidth = 2 * g.getWidth() / (float) size[0];
+						if(textLength + textWidth > displayLength) break;
+						textLength += textWidth;
+					}
+					if(text.alignment == 1) offsetX = (displayLength - textLength) / 2;
+					else if(text.alignment == 2) offsetX = displayLength - textLength - 0.001f;
 				}
-				GL11.glBindTexture(GL11.GL_TEXTURE_2D, g.getTextureID());
-				Matrix4f glyphTranslate = Matrix4f.translate(new Vector3f(offsetX, offsetY, 0));
-				Matrix4f glyphScale = Matrix4f.zoom(g.getWidth() / (float) size[0], g.getHeight() / (float) size[1], 0);
-				shader.setTransformation((Matrix4f) mainTransformation.multiply(glyphTranslate).multiply(glyphScale));
-				GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, quad.getVertexCount());
-				offsetX += 2 * g.getWidth() / (float) size[0];
+				for(int i = 0; i < glyphs.length; i++) {
+					float textWidth = 2 * glyphs[i].getWidth() / (float) size[0];
+					if(offsetX + textWidth >  displayLength) {
+						offsetX = 0;
+						offsetY -= lineHeight;
+						if(text.alignment > 0) {
+							float textLength = 0;
+							for(int j = i; j < glyphs.length; j++) {
+								float textWidth2 = 2 * glyphs[j].getWidth() / (float) size[0];
+								if(textLength + textWidth2 > displayLength) break;
+								textLength += textWidth2;
+							}
+							if(text.alignment == 1) offsetX = (displayLength - textLength) / 2;
+							else if(text.alignment == 2) offsetX = displayLength - textLength - 0.001f;
+						}
+					}
+					GL11.glBindTexture(GL11.GL_TEXTURE_2D, glyphs[i].getTextureID());
+					Matrix4f glyphTranslate = Matrix4f.translate(new Vector3f(offsetX, offsetY, 0));
+					Matrix4f glyphScale = Matrix4f.zoom(glyphs[i].getWidth() / (float) size[0], text.getTextHeight() / (float) size[1], 0);
+					shader.setTransformation((Matrix4f) mainTransformation.multiply(glyphTranslate).multiply(glyphScale));
+					GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, quad.getVertexCount());
+					offsetX += textWidth;
+				}
+				offsetY -= lineHeight;
 			}
 		}
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

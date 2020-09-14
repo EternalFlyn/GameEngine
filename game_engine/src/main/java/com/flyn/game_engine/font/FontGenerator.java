@@ -54,6 +54,7 @@ public class FontGenerator {
 		g.drawString(String.valueOf(character), 0, m.getAscent());
 		g.dispose();
 		}
+		else if(character == '\t') w = 2 * h;
 		Glyph result = new Glyph(image, w, h);
 		fonts.put(key, result);
 		return result;
